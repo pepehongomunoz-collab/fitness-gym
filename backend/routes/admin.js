@@ -103,6 +103,7 @@ router.delete('/holidays/:id', auth, checkRole('admin', 'developer'), async (req
 // Get all users with subscriptions
 router.get('/users', auth, checkRole('admin', 'developer'), async (req, res) => {
     try {
+        console.log('Backend: GET /users hit');
         const { search, role, page = 1, limit = 20 } = req.query;
 
         const query = {};
@@ -120,18 +121,24 @@ router.get('/users', auth, checkRole('admin', 'developer'), async (req, res) => 
             .limit(parseInt(limit))
             .sort({ createdAt: -1 });
 
+        console.log(`Found ${users.length} users`);
+
         // Get subscriptions for each user
-        const usersWithSubs = await Promise.all(users.map(async (user) => {
+        const usersWithSubs = await Promise.all(users.map(async (user, index) => {
+            console.log(`Fetching sub for user ${index}: ${user._id}`);
             const subscription = await Subscription.findOne({ user: user._id })
                 .populate('plan')
                 .sort({ createdAt: -1 });
             return {
                 ...user.toObject(),
-                subscription
+                subscription: subscription ? subscription.toObject() : null
             };
         }));
 
+        console.log('Subscriptions fetched');
+
         const total = await User.countDocuments(query);
+        console.log('Sending response');
 
         res.json({
             users: usersWithSubs,

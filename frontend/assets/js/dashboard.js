@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup booking modal
     setupBookingModal();
 
+    // Setup profile section
+    setupProfileForm();
+
     // Setup calendar
     setupCalendar();
 });
@@ -35,6 +38,26 @@ async function loadUserData() {
         // Update UI with user info
         document.getElementById('userName').textContent = currentUser.name;
         document.getElementById('welcomeName').textContent = currentUser.name.split(' ')[0];
+
+        // Update Header Avatar
+        if (currentUser.avatar) {
+            const avatarContainer = document.getElementById('userAvatar');
+            avatarContainer.innerHTML = `<img src="${currentUser.avatar}" alt="Avatar">`;
+        }
+
+        // Populate Profile Form
+        document.getElementById('profileName').value = currentUser.name;
+        document.getElementById('profileEmail').value = currentUser.email;
+        document.getElementById('profilePhone').value = currentUser.phone || '';
+        document.getElementById('profileAddress').value = currentUser.address || '';
+        document.getElementById('profileHeight').value = currentUser.height || '';
+        document.getElementById('profileWeight').value = currentUser.weight || '';
+
+        document.getElementById('profileNameDisplay').textContent = currentUser.name;
+        document.getElementById('profileEmailDisplay').textContent = currentUser.email;
+        if (currentUser.avatar) {
+            document.getElementById('profileAvatarPreview').src = currentUser.avatar;
+        }
 
         // Load all dashboard data
         loadOverviewData();
@@ -435,16 +458,45 @@ function setupBookingModal() {
 
     openBtn.addEventListener('click', () => {
         modal.classList.add('open');
+        // PRODUCTION ROBUST FIX: User-side matching Admin fix
+        modal.style.display = 'flex';
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        modal.style.zIndex = '9999';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+
+        const content = modal.querySelector('.modal-content');
+        if (content) {
+            content.style.display = 'block';
+            content.style.visibility = 'visible';
+            content.style.opacity = '1';
+            content.style.zIndex = '10000';
+            content.style.position = 'relative';
+            content.style.backgroundColor = '#1f2937';
+        }
+
         loadAvailableSlots(dateInput.value);
     });
 
     closeBtn.addEventListener('click', () => {
         modal.classList.remove('open');
+        modal.style = ''; // Clean forced styles
+        const content = modal.querySelector('.modal-content');
+        if (content) content.style = '';
     });
 
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.classList.remove('open');
+            modal.style = ''; // Clean forced styles
+            const content = modal.querySelector('.modal-content');
+            if (content) content.style = '';
         }
     });
 
@@ -502,7 +554,12 @@ async function handleBooking(e) {
     try {
         await bookingsAPI.create({ date, startTime, endTime });
 
-        document.getElementById('bookingModal').classList.remove('open');
+        const modal = document.getElementById('bookingModal');
+        modal.classList.remove('open');
+        modal.style = ''; // Clean forced styles
+        const content = modal.querySelector('.modal-content');
+        if (content) content.style = '';
+
         loadBookingsData();
         renderCalendar();
 
@@ -582,7 +639,32 @@ function renderCalendar() {
 // Select calendar date
 window.selectCalendarDate = function (date) {
     document.getElementById('bookingDate').value = date;
-    document.getElementById('bookingModal').classList.add('open');
+    const modal = document.getElementById('bookingModal');
+    modal.classList.add('open');
+
+    // PRODUCTION ROBUST FIX: User-side matching Admin fix
+    modal.style.display = 'flex';
+    modal.style.position = 'fixed';
+    modal.style.inset = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    modal.style.zIndex = '9999';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+
+    const content = modal.querySelector('.modal-content');
+    if (content) {
+        content.style.display = 'block';
+        content.style.visibility = 'visible';
+        content.style.opacity = '1';
+        content.style.zIndex = '10000';
+        content.style.position = 'relative';
+        content.style.backgroundColor = '#1f2937';
+    }
+
     loadAvailableSlots(date);
 }
 

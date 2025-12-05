@@ -5,6 +5,7 @@ const User = require('../models/User');
 const auth = async (req, res, next) => {
     try {
         const authHeader = req.header('Authorization');
+        console.log(`Auth Middleware: Processing request for ${req.path}`);
         console.log('Auth header:', authHeader ? 'Present' : 'Missing');
 
         const token = authHeader?.replace('Bearer ', '');

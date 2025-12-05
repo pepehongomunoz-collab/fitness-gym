@@ -94,18 +94,27 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // Update profile
-router.put('/profile', auth, async (req, res) => {
+const upload = require('../middleware/upload');
+
+router.put('/profile', auth, upload.single('avatar'), async (req, res) => {
     try {
-        const { name, phone, avatar } = req.body;
+        const { name, phone, height, weight, address } = req.body;
+        const updateData = { name, phone, height, weight, address };
+
+        if (req.file) {
+            // Store relative path
+            updateData.avatar = `/uploads/profiles/${req.file.filename}`;
+        }
 
         const user = await User.findByIdAndUpdate(
             req.user._id,
-            { name, phone, avatar },
+            updateData,
             { new: true }
         );
 
         res.json(user);
     } catch (error) {
+        console.error('Profile update error:', error);
         res.status(500).json({ message: 'Error al actualizar perfil.' });
     }
 });

@@ -32,6 +32,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    height: {
+        type: Number // in cm
+    },
+    weight: {
+        type: Number // in kg
+    },
+    address: {
+        type: String,
+        trim: true
+    },
     isActive: {
         type: Boolean,
         default: true

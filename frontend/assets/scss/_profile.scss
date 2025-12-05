@@ -1,0 +1,98 @@
+
+// Profile Section Styles
+.profile-container {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header-edit {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+.profile-avatar-upload {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--primary-color);
+    }
+
+    .avatar-edit-overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s;
+        border: 3px solid var(--card-bg);
+        color: white;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+}
+
+.profile-basic-info {
+    h3 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+    }
+
+    p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+}
+
+.profile-form {
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .readonly-input {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: transparent;
+        cursor: not-allowed;
+        color: var(--text-muted);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+}

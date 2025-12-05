@@ -44,6 +44,10 @@
                 <i class="fa-solid fa-apple-whole"></i>
                 <span>Nutrición</span>
             </a>
+            <a href="#profile" class="nav-item" data-section="profile">
+                <i class="fa-solid fa-user-gear"></i>
+                <span>Mi Cuenta</span>
+            </a>
 
             <!-- Admin Section (hidden by default, shown via JS for admin/developer) -->
             <div class="admin-nav-section" id="adminNavSection" style="display: none;">
@@ -249,6 +253,65 @@
                         <i class="fa-solid fa-spinner fa-spin"></i>
                         <p>Cargando plan nutricional...</p>
                     </div>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profile" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Mi Cuenta</h2>
+                </div>
+
+                <div class="profile-container">
+                    <form id="profileForm" class="profile-form">
+                        <div class="profile-header-edit">
+                            <div class="profile-avatar-upload">
+                                <img id="profileAvatarPreview" src="/assets/img/default-avatar.png" alt="Avatar">
+                                <label for="profileAvatarInput" class="avatar-edit-overlay">
+                                    <i class="fa-solid fa-camera"></i>
+                                </label>
+                                <input type="file" id="profileAvatarInput" accept="image/*" hidden>
+                            </div>
+                            <div class="profile-basic-info">
+                                <h3 id="profileNameDisplay">Usuario</h3>
+                                <p id="profileEmailDisplay">usuario@email.com</p>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nombre completo</label>
+                                <input type="text" id="profileName" readonly class="readonly-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="profileEmail" readonly class="readonly-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="tel" id="profilePhone" placeholder="Tu número de teléfono">
+                            </div>
+                            <div class="form-group">
+                                <label>Dirección</label>
+                                <input type="text" id="profileAddress" placeholder="Tu dirección completa">
+                            </div>
+                            <div class="form-group">
+                                <label>Estatura (cm)</label>
+                                <input type="number" id="profileHeight" placeholder="Ej: 175">
+                            </div>
+                            <div class="form-group">
+                                <label>Peso (kg)</label>
+                                <input type="number" id="profileWeight" placeholder="Ej: 75">
+                            </div>
+                        </div>
+
+                        <div id="profileError" class="error-message" style="display: none;"></div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </section>
 

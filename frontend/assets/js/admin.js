@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initAdminPanel() {
     // Show admin navigation
+    console.log('Initializing Admin Panel');
     const adminNav = document.getElementById('adminNavSection');
     if (adminNav) {
         adminNav.style.display = 'block';
@@ -219,15 +220,21 @@ function renderAdminCalendar() {
 }
 
 async function selectAdminDate(dateStr) {
-    adminState.selectedDate = dateStr;
+    console.log('Date selected:', dateStr);
+    try {
+        adminState.selectedDate = dateStr;
 
-    // Update selected date text
-    const date = new Date(dateStr + 'T00:00:00');
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('selectedDateText').textContent = date.toLocaleDateString('es-ES', options);
+        // Update selected date text
+        const date = new Date(dateStr + 'T00:00:00');
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('selectedDateText').textContent = date.toLocaleDateString('es-ES', options);
 
-    // Load bookings for this date
-    await loadAdminBookings(dateStr);
+        // Load bookings for this date
+        await loadAdminBookings(dateStr);
+    } catch (error) {
+        console.error('Error in selectAdminDate:', error);
+        alert('Error al seleccionar fecha: ' + error.message);
+    }
 }
 
 async function loadAdminBookings(dateStr) {
@@ -448,10 +455,19 @@ function setupAdminForms() {
                 }
             });
 
-            document.getElementById('adminBookingModal').classList.remove('open');
             if (adminState.selectedDate) {
                 await loadAdminBookings(adminState.selectedDate);
             }
+
+            // Close modal and clear forced styles
+            const modal = document.getElementById('adminBookingModal');
+            modal.classList.remove('open');
+            modal.style = ''; // Clear all inline styles
+            const content = modal.querySelector('.modal-content');
+            if (content) content.style = ''; // Clear content styles
+
+            document.getElementById('adminBookingForm').reset();
+            alert('Reserva creada exitosamente');
         } catch (error) {
             errorDiv.textContent = error.message;
             errorDiv.style.display = 'block';
@@ -465,7 +481,14 @@ function setupAdminModals() {
         btn.addEventListener('click', () => {
             const modalId = btn.dataset.close;
             if (modalId) {
-                document.getElementById(modalId)?.classList.remove('open');
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('open');
+                    // Clear forced styles if present
+                    modal.style = '';
+                    const content = modal.querySelector('.modal-content');
+                    if (content) content.style = '';
+                }
             }
         });
     });
@@ -477,20 +500,66 @@ function setupAdminModals() {
 }
 
 async function openAdminBookingModal(userId = null) {
-    // Load users for dropdown
-    const select = document.getElementById('adminBookingUser');
-    if (select && adminState.users.length === 0) {
-        const response = await apiRequest('/admin/users');
-        adminState.users = response.users;
+    console.log('Opening Booking Modal', { userId });
+    try {
+        // Load users for dropdown
+        const select = document.getElementById('adminBookingUser');
+        if (select && adminState.users.length === 0) {
+            console.log('Fetching users for modal...');
+            const response = await apiRequest('/admin/users');
+            console.log('Users response received:', response);
+            adminState.users = response.users;
+            console.log('Admin state users updated:', adminState.users.length);
+        }
+
+        console.log('Populating select dropdown...');
+        select.innerHTML = '<option value="">Selecciona un usuario</option>' +
+            adminState.users.map(u => `<option value="${u._id}" ${u._id === userId ? 'selected' : ''}>${u.name} - ${u.email}</option>`).join('');
+
+        if (adminState.selectedDate) {
+            document.getElementById('adminBookingDate').value = adminState.selectedDate;
+        }
+
+        document.getElementById('adminBookingError').style.display = 'none';
+
+        const modal = document.getElementById('adminBookingModal');
+        modal.classList.add('open');
+
+        // Robust fix: Ensure modal overlay styles are applied even if CSS fails
+        // PRODUCTION ROBUST FIX: Matching the "Red Screen" logic exactly
+        modal.style.display = 'flex';
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Production dark overlay
+        modal.style.zIndex = '9999';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+
+        // Force content visibility - CRITICAL based on Red Screen success
+        const content = modal.querySelector('.modal-content');
+        if (content) {
+            content.style.display = 'block';
+            content.style.visibility = 'visible';
+            content.style.opacity = '1';
+            content.style.zIndex = '10000';
+            content.style.position = 'relative';
+            content.style.backgroundColor = '#1f2937'; // Match dashboard theme (dark) or '#fff' if light
+        }
+
+    } catch (error) {
+        console.error('Error opening booking modal:', error);
+        alert('Error al abrir modal: ' + error.message);
     }
-
-    select.innerHTML = '<option value="">Selecciona un usuario</option>' +
-        adminState.users.map(u => `<option value="${u._id}" ${u._id === userId ? 'selected' : ''}>${u.name} - ${u.email}</option>`).join('');
-
-    if (adminState.selectedDate) {
-        document.getElementById('adminBookingDate').value = adminState.selectedDate;
-    }
-
-    document.getElementById('adminBookingError').style.display = 'none';
-    document.getElementById('adminBookingModal').classList.add('open');
 }
+// Make functions global for inline onclick handlers
+window.openAssignPlanModal = openAssignPlanModal;
+window.openAdminBookingModal = openAdminBookingModal;
+window.selectAdminDate = selectAdminDate;
+window.cancelAdminBooking = cancelAdminBooking;
+window.deleteHoliday = deleteHoliday;
+window.loadAdminUsers = loadAdminUsers; // Helpful for reloads
+window.loadAdminCalendar = loadAdminCalendar; // Helpful for reloads

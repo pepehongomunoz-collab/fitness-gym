@@ -1,5 +1,8 @@
 // API Configuration
-const API_URL = '/api';
+// API Configuration
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '5000'
+    ? 'http://localhost:5000/api'
+    : '/api';
 
 // Get stored token
 function getToken() {
@@ -34,19 +37,33 @@ async function apiRequest(endpoint, options = {}) {
 
     const config = {
         headers: {
-            'Content-Type': 'application/json',
             ...(token && { 'Authorization': `Bearer ${token}` })
         },
         ...options
     };
 
-    if (options.body && typeof options.body === 'object') {
-        config.body = JSON.stringify(options.body);
+    if (!(options.body instanceof FormData)) {
+        config.headers['Content-Type'] = 'application/json';
+        if (options.body && typeof options.body === 'object') {
+            config.body = JSON.stringify(options.body);
+        }
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    config.signal = controller.signal;
+
     try {
+        console.log(`API Request starting: ${config.method || 'GET'} ${API_URL}${endpoint}`);
         const response = await fetch(`${API_URL}${endpoint}`, config);
-        const data = await response.json();
+        clearTimeout(timeoutId);
+        console.log(`API Response received: ${response.status} ${response.statusText}`);
+
+        const text = await response.text();
+        console.log('API Response body length:', text.length);
+
+        const data = text ? JSON.parse(text) : {};
+        console.log('API Body parsed successfully');
 
         if (!response.ok) {
             throw new Error(data.message || 'Error en la solicitud');
