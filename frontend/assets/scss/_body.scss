@@ -1,0 +1,14 @@
+@use 'variables' as v;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: v.$font-main;
+    background-color: v.$dark-bg;
+    color: v.$text-color;
+    overflow-x: hidden;
+}

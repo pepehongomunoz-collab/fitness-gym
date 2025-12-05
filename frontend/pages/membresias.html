@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membresías - Fitness Gym</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="memberships-page">
+    <!-- Header -->
+    <header>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/membresias" class="active">Membresías</a></li>
+            <li><a href="/dashboard">Mi Dashboard</a></li>
+            <li><a href="/dashboard">Market</a></li>
+        </ul>
+
+        <a href="/" class="logo">
+            <i class="fa-solid fa-dumbbell"></i>
+            <span>FITNESS<br>GYM</span>
+        </a>
+
+        <a href="/login" class="login-icon" title="Iniciar Sesión" id="authIcon">
+            <i class="fa-solid fa-user"></i>
+        </a>
+
+        <div class="menu-icon">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="memberships-hero">
+        <div class="hero-content">
+            <h1>Elige tu <span class="highlight">Plan</span></h1>
+            <p>Transforma tu vida con el plan que mejor se adapte a tus objetivos</p>
+        </div>
+    </section>
+
+    <!-- Plans Section -->
+    <section class="plans-section">
+        <div class="plans-container">
+            <!-- Classic Plan -->
+            <div class="plan-card" data-plan="classic">
+                <div class="plan-badge">Popular</div>
+                <div class="plan-icon">
+                    <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <h2 class="plan-name">Classic</h2>
+                <div class="plan-price">
+                    <span class="currency">$</span>
+                    <span class="amount">30.000</span>
+                    <span class="period">/mes</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Acceso a sala de musculación</li>
+                    <li><i class="fa-solid fa-check"></i> Hasta 2 horas diarias</li>
+                    <li><i class="fa-solid fa-check"></i> Casillero incluido</li>
+                    <li><i class="fa-solid fa-check"></i> Duchas y vestuario</li>
+                    <li><i class="fa-solid fa-check"></i> App de seguimiento</li>
+                    <li class="disabled"><i class="fa-solid fa-xmark"></i> Clases grupales</li>
+                    <li class="disabled"><i class="fa-solid fa-xmark"></i> Personal trainer</li>
+                </ul>
+                <button class="btn btn-subscribe" onclick="subscribeToPlan('classic')">
+                    <span>Suscribirme</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="plan-card featured" data-plan="premium">
+                <div class="plan-badge">Recomendado</div>
+                <div class="plan-icon">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <h2 class="plan-name">Premium</h2>
+                <div class="plan-price">
+                    <span class="currency">$</span>
+                    <span class="amount">50.000</span>
+                    <span class="period">/mes</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Acceso ilimitado 24/7</li>
+                    <li><i class="fa-solid fa-check"></i> Clases grupales incluidas</li>
+                    <li><i class="fa-solid fa-check"></i> Personal trainer 1x/semana</li>
+                    <li><i class="fa-solid fa-check"></i> Nutricionista 1x/mes</li>
+                    <li><i class="fa-solid fa-check"></i> Toalla incluida</li>
+                    <li><i class="fa-solid fa-check"></i> Estacionamiento gratis</li>
+                    <li><i class="fa-solid fa-check"></i> Acceso área VIP</li>
+                </ul>
+                <button class="btn btn-subscribe btn-featured" onclick="subscribeToPlan('premium')">
+                    <span>Suscribirme</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Online Plan -->
+            <div class="plan-card" data-plan="online">
+                <div class="plan-badge">Desde casa</div>
+                <div class="plan-icon">
+                    <i class="fa-solid fa-laptop"></i>
+                </div>
+                <h2 class="plan-name">Online</h2>
+                <div class="plan-price">
+                    <span class="currency">$</span>
+                    <span class="amount">15.000</span>
+                    <span class="period">/mes</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-check"></i> Rutinas personalizadas</li>
+                    <li><i class="fa-solid fa-check"></i> Seguimiento online</li>
+                    <li><i class="fa-solid fa-check"></i> App móvil completa</li>
+                    <li><i class="fa-solid fa-check"></i> Videos de ejercicios HD</li>
+                    <li><i class="fa-solid fa-check"></i> Chat con trainer</li>
+                    <li class="disabled"><i class="fa-solid fa-xmark"></i> Acceso presencial</li>
+                    <li class="disabled"><i class="fa-solid fa-xmark"></i> Clases en vivo</li>
+                </ul>
+                <button class="btn btn-subscribe" onclick="subscribeToPlan('online')">
+                    <span>Suscribirme</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <h2>¿Por qué elegirnos?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fa-solid fa-clock"></i>
+                <h3>Horarios Flexibles</h3>
+                <p>Abierto de Lunes a Sábado de 6:00 a 22:00</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-users"></i>
+                <h3>Profesionales</h3>
+                <p>Staff certificado y con experiencia</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-medal"></i>
+                <h3>Equipamiento</h3>
+                <p>Máquinas de última generación</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-heart"></i>
+                <h3>Comunidad</h3>
+                <p>Más de 5000 miembros activos</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading Modal -->
+    <div class="modal" id="loadingModal">
+        <div class="modal-content loading-content">
+            <div class="spinner"></div>
+            <p>Preparando tu pago...</p>
+        </div>
+    </div>
+
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/memberships.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito - Fitness Gym</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="cart-page">
+    <!-- Header -->
+    <header>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/membresias">Membresías</a></li>
+            <li><a href="/market">Market</a></li>
+            <li><a href="/dashboard">Mi Dashboard</a></li>
+        </ul>
+
+        <a href="/" class="logo">
+            <i class="fa-solid fa-dumbbell"></i>
+            <span>FITNESS<br>GYM</span>
+        </a>
+
+        <div class="header-actions">
+            <a href="/cart" class="cart-icon active" title="Carrito">
+                <i class="fa-solid fa-shopping-cart"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </a>
+            <a href="/login" class="login-icon" title="Iniciar Sesión" id="authIcon">
+                <i class="fa-solid fa-user"></i>
+            </a>
+        </div>
+
+        <div class="menu-icon">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="cart-main">
+        <div class="cart-container">
+            <div class="cart-header">
+                <h1><i class="fa-solid fa-shopping-cart"></i> Mi Carrito</h1>
+                <a href="/market" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Seguir comprando
+                </a>
+            </div>
+
+            <!-- Cart Content -->
+            <div class="cart-content">
+                <!-- Cart Items -->
+                <div class="cart-items" id="cartItems">
+                    <div class="loading-spinner">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <p>Cargando carrito...</p>
+                    </div>
+                </div>
+
+                <!-- Cart Summary -->
+                <div class="cart-summary" id="cartSummary">
+                    <h3>Resumen del pedido</h3>
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal">$0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span id="shipping">Gratis</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span id="total">$0</span>
+                    </div>
+                    <button class="btn btn-checkout" id="checkoutBtn">
+                        <i class="fa-solid fa-lock"></i> Proceder al pago
+                    </button>
+                    <button class="btn btn-clear" id="clearCartBtn">
+                        <i class="fa-solid fa-trash"></i> Vaciar carrito
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty Cart State -->
+            <div class="empty-cart" id="emptyCart" style="display: none;">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <h2>Tu carrito está vacío</h2>
+                <p>¡Explora nuestra tienda y encuentra los mejores productos para tu entrenamiento!</p>
+                <a href="/market" class="btn btn-primary">
+                    <i class="fa-solid fa-store"></i> Ir a la tienda
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Required Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Iniciar Sesión Requerido</h3>
+                <button class="modal-close" id="closeLoginModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Para completar tu compra, necesitas iniciar sesión o crear una cuenta.</p>
+                <div class="modal-actions">
+                    <a href="/login" class="btn btn-primary">Iniciar Sesión</a>
+                    <a href="/register" class="btn btn-secondary">Crear Cuenta</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/cart.js"></script>
+</body>
+
+</html>

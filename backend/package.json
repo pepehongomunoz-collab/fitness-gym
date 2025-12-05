@@ -1,0 +1,31 @@
+{
+    "name": "gym-fit-backend",
+    "version": "1.0.0",
+    "description": "Backend API for Gym-Fit management system",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "node --watch server.js",
+        "sass": "sass ../frontend/assets/scss/style.scss ../frontend/assets/css/style.css",
+        "sass:watch": "sass --watch ../frontend/assets/scss/style.scss ../frontend/assets/css/style.css"
+    },
+    "keywords": [
+        "gym",
+        "fitness",
+        "management"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "jsonwebtoken": "^9.0.2",
+        "mercadopago": "^2.11.0",
+        "mongoose": "^8.0.3"
+    },
+    "devDependencies": {
+        "sass": "^1.94.2"
+    }
+}

@@ -1,0 +1,940 @@
+// ============================================
+// DASHBOARD PAGE STYLES
+// ============================================
+
+.dashboard-page {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+// Sidebar
+.sidebar {
+  width: 260px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s ease;
+
+  @media (max-width: 992px) {
+    transform: translateX(-100%);
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    i {
+      font-size: 2rem;
+      color: #ff6b35;
+    }
+
+    span {
+      font-size: 0.875rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+    }
+  }
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1rem 0;
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: all 0.3s ease;
+
+    i {
+      width: 20px;
+      text-align: center;
+    }
+
+    &:hover,
+    &.active {
+      color: #fff;
+      background: rgba(255, 107, 53, 0.1);
+      border-left: 3px solid #ff6b35;
+    }
+
+    &.active {
+      color: #ff6b35;
+    }
+  }
+}
+
+.sidebar-footer {
+  padding: 1rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+// Main Content
+.dashboard-main {
+  flex: 1;
+  margin-left: 260px;
+  min-height: 100vh;
+
+  @media (max-width: 992px) {
+    margin-left: 0;
+  }
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+
+    @media (max-width: 992px) {
+      display: block;
+    }
+  }
+
+  .header-title h1 {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .header-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fff;
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #ff6b35, #ff8c42);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
+.dashboard-content {
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+.dashboard-section {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+// Welcome Card
+.welcome-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+
+  .welcome-text {
+    h2 {
+      color: #fff;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  .welcome-icon {
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+// Stats Grid
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+  }
+
+  &.plan-card .stat-icon {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #fff;
+  }
+
+  &.bookings-card .stat-icon {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+  }
+
+  &.routine-card .stat-icon {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+  }
+
+  &.nutrition-card .stat-icon {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    color: #fff;
+  }
+
+  .stat-info {
+    h3 {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+      color: #fff;
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+  }
+}
+
+// Status Badge
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.status-al_dia {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+  }
+
+  &.status-pendiente {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+  }
+
+  &.status-suspendido,
+  &.status-inactive {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+}
+
+// Section Header
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+}
+
+// Plan Detail Card
+.plan-detail-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 500px;
+
+  .plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .plan-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+
+    &.classic {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff;
+    }
+
+    &.premium {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #1a1a2e;
+    }
+
+    &.online {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+    }
+  }
+
+  .plan-price {
+    margin-bottom: 1.5rem;
+
+    .currency {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.5rem;
+    }
+
+    .amount {
+      color: #fff;
+      font-size: 3rem;
+      font-weight: 800;
+    }
+
+    .period {
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  .plan-info {
+    margin-bottom: 1.5rem;
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+      .label {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .value {
+        color: #fff;
+        font-weight: 500;
+
+        &.warning {
+          color: #fbbf24;
+        }
+      }
+    }
+  }
+
+  .plan-features {
+    h4 {
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        padding: 0.5rem 0;
+
+        i {
+          color: #10b981;
+        }
+      }
+    }
+  }
+}
+
+// Loading Spinner
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: rgba(255, 255, 255, 0.6);
+
+  i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #ff6b35;
+  }
+}
+
+// No Data Card
+.no-data-card {
+  text-align: center;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+
+  i {
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.3);
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1.5rem;
+  }
+}
+
+// Routine Styles
+.routine-header {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .routine-goal {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 107, 53, 0.2);
+    color: #ff6b35;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .routine-trainer {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.routine-days {
+  display: grid;
+  gap: 1rem;
+}
+
+.routine-day {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  overflow: hidden;
+
+  .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+
+    h4 {
+      color: #fff;
+      margin: 0;
+    }
+
+    .muscle-group {
+      color: #ff6b35;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+  }
+}
+
+.exercises-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 0.75rem 1.5rem;
+    text-align: left;
+  }
+
+  th {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  td {
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+// Calendar Styles
+.bookings-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.calendar-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h3 {
+    color: #fff;
+    font-size: 1.25rem;
+  }
+
+  .calendar-nav {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    &:hover {
+      background: rgba(255, 107, 53, 0.3);
+    }
+  }
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+
+  span {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover:not(.empty):not(.past):not(.closed) {
+    background: rgba(255, 107, 53, 0.3);
+  }
+
+  &.today {
+    background: #ff6b35;
+    font-weight: 700;
+  }
+
+  &.past,
+  &.closed {
+    color: rgba(255, 255, 255, 0.3);
+    cursor: not-allowed;
+  }
+
+  &.empty {
+    cursor: default;
+  }
+}
+
+.bookings-list {
+  h3 {
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+}
+
+.booking-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  margin-bottom: 0.75rem;
+
+  .booking-date {
+    text-align: center;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 107, 53, 0.2);
+    border-radius: 0.5rem;
+
+    .day {
+      display: block;
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .month {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+  }
+
+  .booking-info {
+    flex: 1;
+
+    .time {
+      display: block;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .duration {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+    }
+  }
+
+  .btn-cancel {
+    background: rgba(239, 68, 68, 0.2);
+    border: none;
+    color: #ef4444;
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.4);
+    }
+  }
+
+  &.cancelled {
+    opacity: 0.5;
+    text-decoration: line-through;
+  }
+
+  &.completed {
+    opacity: 0.7;
+  }
+}
+
+.no-bookings {
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  padding: 2rem;
+}
+
+// Modal
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+  overflow-y: auto;
+
+  &.open,
+  &.active {
+    display: flex;
+  }
+}
+
+.modal-content {
+  background: #1a1a2e;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 450px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  h3 {
+    color: #fff;
+    margin: 0;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.25rem;
+    cursor: pointer;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+}
+
+.modal-body {
+  padding: 1.5rem;
+
+  .form-group {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      color: #fff;
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+        border-color: #ff6b35;
+      }
+
+      option {
+        background: #1a1a2e;
+      }
+    }
+  }
+}
+
+// Nutrition Styles
+.nutrition-header {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .nutrition-goal {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+.nutrition-macros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  .macro-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+
+    .macro-value {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .macro-label {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.875rem;
+    }
+
+    &.calories .macro-value {
+      color: #f59e0b;
+    }
+
+    &.protein .macro-value {
+      color: #ef4444;
+    }
+
+    &.carbs .macro-value {
+      color: #3b82f6;
+    }
+
+    &.fat .macro-value {
+      color: #8b5cf6;
+    }
+  }
+}
+
+.nutrition-days {
+  display: grid;
+  gap: 1rem;
+}
+
+.nutrition-day {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+
+  h5 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .meal {
+    margin-bottom: 1rem;
+
+    .meal-type {
+      color: #ff6b35;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+    }
+
+    .meal-foods {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0 0;
+
+      li {
+        color: rgba(255, 255, 255, 0.8);
+        padding: 0.25rem 0;
+        padding-left: 1rem;
+        position: relative;
+
+        &::before {
+          content: '•';
+          position: absolute;
+          left: 0;
+          color: rgba(255, 255, 255, 0.4);
+        }
+      }
+    }
+  }
+}
+
+.routine-notes,
+.nutrition-notes {
+  background: rgba(255, 107, 53, 0.1);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+
+  h4 {
+    color: #ff6b35;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin: 0;
+  }
+}

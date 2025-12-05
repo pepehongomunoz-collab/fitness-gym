@@ -1,0 +1,21 @@
+.antigravity/
+.gemini/
+.config/
+bash_history
+*.log
+backend/.env
+
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

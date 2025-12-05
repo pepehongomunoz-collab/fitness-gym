@@ -1,0 +1,15 @@
+$primary-color: #8A2BE2;
+$secondary-color: #9d4edd;
+$accent-color: #e0aaff;
+$dark-bg: #0a0a0a;
+$text-color: #ffffff;
+$font-main: 'Montserrat', sans-serif;
+
+:root {
+    --primary-color: #{$primary-color};
+    --secondary-color: #{$secondary-color};
+    --accent-color: #{$accent-color};
+    --dark-bg: #{$dark-bg};
+    --text-color: #{$text-color};
+    --font-main: #{$font-main};
+}

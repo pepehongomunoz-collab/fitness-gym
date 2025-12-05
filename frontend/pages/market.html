@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market - Fitness Gym</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="market-page">
+    <!-- Header -->
+    <header>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/membresias">Membresías</a></li>
+            <li><a href="/market" class="active">Market</a></li>
+            <li><a href="/dashboard">Mi Dashboard</a></li>
+        </ul>
+
+        <a href="/" class="logo">
+            <i class="fa-solid fa-dumbbell"></i>
+            <span>FITNESS<br>GYM</span>
+        </a>
+
+        <div class="header-actions">
+            <a href="/cart" class="cart-icon" title="Carrito">
+                <i class="fa-solid fa-shopping-cart"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </a>
+            <a href="/login" class="login-icon" title="Iniciar Sesión" id="authIcon">
+                <i class="fa-solid fa-user"></i>
+            </a>
+        </div>
+
+        <div class="menu-icon">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="market-main">
+        <!-- Filters Sidebar -->
+        <aside class="filters-sidebar">
+            <div class="filters-header">
+                <h3><i class="fa-solid fa-filter"></i> Filtros</h3>
+                <button class="btn-clear-filters" id="clearFilters">Limpiar</button>
+            </div>
+
+            <!-- Search -->
+            <div class="filter-group">
+                <label>Buscar</label>
+                <div class="search-input">
+                    <input type="text" id="searchInput" placeholder="Buscar productos...">
+                    <i class="fa-solid fa-search"></i>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="filter-group">
+                <label>Categoría</label>
+                <div class="category-filters">
+                    <button class="category-btn active" data-category="">Todos</button>
+                    <button class="category-btn" data-category="indumentaria">
+                        <i class="fa-solid fa-shirt"></i> Indumentaria
+                    </button>
+                    <button class="category-btn" data-category="zapatillas">
+                        <i class="fa-solid fa-shoe-prints"></i> Zapatillas
+                    </button>
+                    <button class="category-btn" data-category="complementos">
+                        <i class="fa-solid fa-cookie-bite"></i> Complementos
+                    </button>
+                    <button class="category-btn" data-category="suplementos">
+                        <i class="fa-solid fa-flask"></i> Suplementos
+                    </button>
+                    <button class="category-btn" data-category="vitaminas">
+                        <i class="fa-solid fa-capsules"></i> Vitaminas
+                    </button>
+                    <button class="category-btn" data-category="bolsos">
+                        <i class="fa-solid fa-bag-shopping"></i> Bolsos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="filter-group">
+                <label>Rango de Precio</label>
+                <div class="price-inputs">
+                    <input type="number" id="minPrice" placeholder="Mín" min="0">
+
+                    <input type="number" id="maxPrice" placeholder="Máx" min="0">
+                </div>
+                <button class="btn btn-apply-price" id="applyPrice">Aplicar</button>
+            </div>
+
+            <!-- Sort -->
+            <div class="filter-group">
+                <label>Ordenar por</label>
+                <select id="sortSelect">
+                    <option value="">Más recientes</option>
+                    <option value="price_asc">Precio: menor a mayor</option>
+                    <option value="price_desc">Precio: mayor a menor</option>
+                    <option value="name">Nombre A-Z</option>
+                </select>
+            </div>
+        </aside>
+
+        <!-- Products Section -->
+        <section class="products-section">
+            <div class="products-header">
+                <h1>Tienda Fitness</h1>
+                <p id="productsCount">Cargando productos...</p>
+            </div>
+
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here -->
+                <div class="loading-spinner">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>Cargando productos...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toastMessage">Producto agregado al carrito</span>
+    </div>
+
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/market.js"></script>
+</body>
+
+</html>

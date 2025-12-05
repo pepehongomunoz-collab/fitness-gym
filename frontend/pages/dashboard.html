@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Fitness Gym</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="dashboard-page">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="logo">
+                <i class="fa-solid fa-dumbbell"></i>
+                <span>FITNESS<br>GYM</span>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#overview" class="nav-item active" data-section="overview">
+                <i class="fa-solid fa-house"></i>
+                <span>Inicio</span>
+            </a>
+            <a href="#plan" class="nav-item" data-section="plan">
+                <i class="fa-solid fa-credit-card"></i>
+                <span>Mi Plan</span>
+            </a>
+            <a href="#routine" class="nav-item" data-section="routine">
+                <i class="fa-solid fa-dumbbell"></i>
+                <span>Mi Rutina</span>
+            </a>
+            <a href="#bookings" class="nav-item" data-section="bookings">
+                <i class="fa-solid fa-calendar-check"></i>
+                <span>Reservas</span>
+            </a>
+            <a href="#nutrition" class="nav-item" data-section="nutrition">
+                <i class="fa-solid fa-apple-whole"></i>
+                <span>Nutrición</span>
+            </a>
+
+            <!-- Admin Section (hidden by default, shown via JS for admin/developer) -->
+            <div class="admin-nav-section" id="adminNavSection" style="display: none;">
+                <div class="nav-divider">
+                    <span>Administración</span>
+                </div>
+                <a href="#admin-users" class="nav-item" data-section="admin-users">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <span>Usuarios</span>
+                </a>
+                <a href="#admin-bookings" class="nav-item" data-section="admin-bookings">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Gestión Reservas</span>
+                </a>
+                <a href="#admin-settings" class="nav-item" data-section="admin-settings">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Configuración</span>
+                </a>
+                <a href="#admin-products" class="nav-item" data-section="admin-products">
+                    <i class="fa-solid fa-box"></i>
+                    <span>Productos</span>
+                </a>
+                <a href="#admin-reports" class="nav-item" data-section="admin-reports">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Reportería</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item" id="logoutBtn">
+                <i class="fa-solid fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Top Bar -->
+        <header class="dashboard-header">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="header-title">
+                <h1 id="pageTitle">Dashboard</h1>
+            </div>
+            <div class="header-user">
+                <span id="userName">Usuario</span>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Overview Section -->
+            <section id="overview" class="dashboard-section active">
+                <div class="welcome-card">
+                    <div class="welcome-text">
+                        <h2>¡Bienvenido, <span id="welcomeName">Usuario</span>!</h2>
+                        <p>Aquí tienes un resumen de tu actividad</p>
+                    </div>
+                    <div class="welcome-icon">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <!-- Plan Card -->
+                    <div class="stat-card plan-card">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Mi Plan</h3>
+                            <p id="overviewPlan" class="stat-value">Cargando...</p>
+                            <span id="overviewPlanStatus" class="status-badge">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Bookings Card -->
+                    <div class="stat-card bookings-card">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-calendar"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Próxima Reserva</h3>
+                            <p id="overviewNextBooking" class="stat-value">Sin reservas</p>
+                        </div>
+                    </div>
+
+                    <!-- Routine Card -->
+                    <div class="stat-card routine-card">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-dumbbell"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Rutina Actual</h3>
+                            <p id="overviewRoutine" class="stat-value">Cargando...</p>
+                        </div>
+                    </div>
+
+                    <!-- Nutrition Card -->
+                    <div class="stat-card nutrition-card">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-apple-whole"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Plan Nutricional</h3>
+                            <p id="overviewNutrition" class="stat-value">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Plan Section -->
+            <section id="plan" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Mi Plan</h2>
+                </div>
+
+                <div id="planContent" class="plan-content">
+                    <!-- Plan info will be loaded here -->
+                    <div class="loading-spinner">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <p>Cargando información del plan...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Routine Section -->
+            <section id="routine" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Mi Rutina</h2>
+                </div>
+
+                <div id="routineContent" class="routine-content">
+                    <!-- Routine will be loaded here -->
+                    <div class="loading-spinner">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <p>Cargando tu rutina...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bookings Section -->
+            <section id="bookings" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Reserva de Turnos</h2>
+                    <button class="btn btn-primary" id="newBookingBtn">
+                        <i class="fa-solid fa-plus"></i>
+                        Nueva Reserva
+                    </button>
+                </div>
+
+                <div class="bookings-layout">
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <button class="calendar-nav" id="prevMonth">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <h3 id="currentMonth">Diciembre 2025</h3>
+                            <button class="calendar-nav" id="nextMonth">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="calendar-grid">
+                            <div class="calendar-weekdays">
+                                <span>Dom</span>
+                                <span>Lun</span>
+                                <span>Mar</span>
+                                <span>Mié</span>
+                                <span>Jue</span>
+                                <span>Vie</span>
+                                <span>Sáb</span>
+                            </div>
+                            <div class="calendar-days" id="calendarDays">
+                                <!-- Days will be generated -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bookings-list">
+                        <h3>Mis Reservas</h3>
+                        <div id="bookingsList">
+                            <!-- Bookings will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Nutrition Section -->
+            <section id="nutrition" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Plan Nutricional</h2>
+                </div>
+
+                <div id="nutritionContent" class="nutrition-content">
+                    <!-- Nutrition plan will be loaded here -->
+                    <div class="loading-spinner">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <p>Cargando plan nutricional...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== ADMIN SECTIONS ==================== -->
+
+            <!-- Admin Users Section -->
+            <section id="admin-users" class="dashboard-section admin-section">
+                <div class="section-header">
+                    <h2>Gestión de Usuarios</h2>
+                    <div class="search-box">
+                        <input type="text" id="userSearch" placeholder="Buscar usuario...">
+                        <i class="fa-solid fa-search"></i>
+                    </div>
+                </div>
+
+                <div class="admin-stats">
+                    <div class="stat-mini"><span id="statTotalUsers">0</span> usuarios</div>
+                    <div class="stat-mini"><span id="statActiveSubscriptions">0</span> planes activos</div>
+                    <div class="stat-mini"><span id="statPendingSubscriptions">0</span> pendientes</div>
+                </div>
+
+                <div class="users-table-container">
+                    <table class="admin-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Plan</th>
+                                <th>Estado</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Users will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Admin Bookings Section -->
+            <section id="admin-bookings" class="dashboard-section admin-section">
+                <div class="section-header">
+                    <h2>Gestión de Reservas</h2>
+                    <button class="btn btn-primary" id="adminNewBookingBtn">
+                        <i class="fa-solid fa-plus"></i>
+                        Nueva Reserva
+                    </button>
+                </div>
+
+                <div class="admin-bookings-layout">
+                    <div class="admin-calendar-container">
+                        <div class="calendar-header">
+                            <button class="calendar-nav" id="adminPrevMonth">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <h3 id="adminCurrentMonth">Diciembre 2025</h3>
+                            <button class="calendar-nav" id="adminNextMonth">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="calendar-grid">
+                            <div class="calendar-weekdays">
+                                <span>Dom</span><span>Lun</span><span>Mar</span>
+                                <span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+                            </div>
+                            <div class="calendar-days" id="adminCalendarDays">
+                            </div>
+                        </div>
+                        <div class="calendar-legend">
+                            <span class="legend-item"><span class="dot closed"></span> Cerrado</span>
+                            <span class="legend-item"><span class="dot holiday"></span> Feriado</span>
+                            <span class="legend-item"><span class="dot booked"></span> Reservas</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-bookings-list">
+                        <h3>Reservas del día: <span id="selectedDateText">Selecciona una fecha</span></h3>
+                        <div id="adminBookingsList">
+                            <p class="no-data">Selecciona un día para ver las reservas</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin Settings Section -->
+            <section id="admin-settings" class="dashboard-section admin-section">
+                <div class="section-header">
+                    <h2>Configuración del Gimnasio</h2>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Operating Hours -->
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-clock"></i> Horario de Operación</h3>
+                        <form id="hoursForm" class="settings-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Apertura</label>
+                                    <input type="time" id="openTime" value="06:00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Cierre</label>
+                                    <input type="time" id="closeTime" value="22:00">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Días cerrados</label>
+                                <div class="checkbox-group">
+                                    <label><input type="checkbox" name="closedDays" value="0"> Dom</label>
+                                    <label><input type="checkbox" name="closedDays" value="1"> Lun</label>
+                                    <label><input type="checkbox" name="closedDays" value="2"> Mar</label>
+                                    <label><input type="checkbox" name="closedDays" value="3"> Mié</label>
+                                    <label><input type="checkbox" name="closedDays" value="4"> Jue</label>
+                                    <label><input type="checkbox" name="closedDays" value="5"> Vie</label>
+                                    <label><input type="checkbox" name="closedDays" value="6"> Sáb</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Guardar Horarios</button>
+                        </form>
+                    </div>
+
+                    <!-- Holidays -->
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-calendar-xmark"></i> Feriados / Días Especiales</h3>
+                        <form id="holidayForm" class="settings-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Fecha</label>
+                                    <input type="date" id="holidayDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Nombre</label>
+                                    <input type="text" id="holidayName" placeholder="Ej: Navidad" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Agregar Feriado</button>
+                        </form>
+                        <div class="holidays-list" id="holidaysList">
+                            <!-- Holidays will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin Products Section -->
+            <section id="admin-products" class="dashboard-section admin-section">
+                <div class="section-header">
+                    <h2>Gestión de Productos</h2>
+                    <button class="btn btn-primary" id="newProductBtn">
+                        <i class="fa-solid fa-plus"></i>
+                        Nuevo Producto
+                    </button>
+                </div>
+
+                <div class="admin-stats">
+                    <div class="stat-mini"><span id="statTotalProducts">0</span> productos</div>
+                    <div class="stat-mini"><span id="statLowStock">0</span> bajo stock</div>
+                    <div class="stat-mini"><span id="statOutOfStock">0</span> sin stock</div>
+                </div>
+
+                <div class="products-table-container">
+                    <table class="admin-table" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>Imagen</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <!-- Products will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Admin Reports Section -->
+            <section id="admin-reports" class="dashboard-section admin-section">
+                <div class="section-header">
+                    <h2>Reportería y Estadísticas</h2>
+                    <div class="date-filter">
+                        <input type="date" id="reportStartDate">
+                        <span>a</span>
+                        <input type="date" id="reportEndDate">
+                        <button class="btn btn-secondary" id="applyDateFilter">Filtrar</button>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="reports-summary">
+                    <div class="report-card">
+                        <div class="report-icon sales"><i class="fa-solid fa-shopping-cart"></i></div>
+                        <div class="report-info">
+                            <h4>Ventas Market</h4>
+                            <p class="report-value" id="reportMarketSales">$0</p>
+                            <span class="report-count" id="reportOrdersCount">0 órdenes</span>
+                        </div>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-icon subs"><i class="fa-solid fa-crown"></i></div>
+                        <div class="report-info">
+                            <h4>Suscripciones</h4>
+                            <p class="report-value" id="reportSubsRevenue">$0</p>
+                            <span class="report-count" id="reportSubsCount">0 activas</span>
+                        </div>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-icon balance"><i class="fa-solid fa-wallet"></i></div>
+                        <div class="report-info">
+                            <h4>Balance Total</h4>
+                            <p class="report-value" id="reportTotalBalance">$0</p>
+                            <span class="report-count">Ingresos totales</span>
+                        </div>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-icon stock"><i class="fa-solid fa-boxes-stacked"></i></div>
+                        <div class="report-info">
+                            <h4>Stock Bajo</h4>
+                            <p class="report-value" id="reportLowStock">0</p>
+                            <span class="report-count">productos con bajo stock</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="reports-charts">
+                    <div class="chart-container">
+                        <h3><i class="fa-solid fa-chart-line"></i> Ventas - Últimos 7 días</h3>
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3><i class="fa-solid fa-chart-bar"></i> Suscripciones - Últimos 7 días</h3>
+                        <canvas id="subscriptionsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Orders Table -->
+                <div class="reports-table">
+                    <h3><i class="fa-solid fa-list"></i> Órdenes Recientes</h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Orden</th>
+                                <th>Cliente</th>
+                                <th>Productos</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Orders will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Booking Modal -->
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nueva Reserva</h3>
+                <button class="modal-close" id="closeBookingModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label for="bookingDate">Fecha</label>
+                        <input type="date" id="bookingDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookingTime">Hora de inicio</label>
+                        <select id="bookingTime" required>
+                            <option value="">Selecciona un horario</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookingDuration">Duración</label>
+                        <select id="bookingDuration" required>
+                            <option value="30">30 minutos</option>
+                            <option value="60">1 hora</option>
+                            <option value="90">1 hora 30 min</option>
+                            <option value="120">2 horas</option>
+                        </select>
+                    </div>
+                    <div id="bookingError" class="error-message" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Confirmar Reserva</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Assign Plan Modal -->
+    <div class="modal" id="assignPlanModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Asignar Plan a Usuario</h3>
+                <button class="modal-close" data-close="assignPlanModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="assignPlanForm">
+                    <input type="hidden" id="assignUserId">
+                    <div class="form-group">
+                        <label>Usuario</label>
+                        <input type="text" id="assignUserName" readonly class="readonly-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="assignPlanId">Plan</label>
+                        <select id="assignPlanId" required>
+                            <option value="">Selecciona un plan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignStatus">Estado</label>
+                        <select id="assignStatus" required>
+                            <option value="al_dia">Al día</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="suspendido">Suspendido</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignMonths">Duración (meses)</label>
+                        <select id="assignMonths" required>
+                            <option value="1">1 mes</option>
+                            <option value="3">3 meses</option>
+                            <option value="6">6 meses</option>
+                            <option value="12">12 meses</option>
+                        </select>
+                    </div>
+                    <div id="assignError" class="error-message" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Asignar Plan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Create Booking Modal -->
+    <div class="modal" id="adminBookingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Reserva para Usuario</h3>
+                <button class="modal-close" data-close="adminBookingModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="adminBookingForm">
+                    <div class="form-group">
+                        <label for="adminBookingUser">Usuario</label>
+                        <select id="adminBookingUser" required>
+                            <option value="">Buscar usuario...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminBookingDate">Fecha</label>
+                        <input type="date" id="adminBookingDate" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminBookingStart">Hora inicio</label>
+                            <input type="time" id="adminBookingStart" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminBookingEnd">Hora fin</label>
+                            <input type="time" id="adminBookingEnd" required>
+                        </div>
+                    </div>
+                    <div id="adminBookingError" class="error-message" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Crear Reserva</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="productModalTitle">Nuevo Producto</h3>
+                <button class="modal-close" data-close="productModal">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+
+                    <div class="form-row">
+                        <div class="form-group image-upload-group">
+                            <label>Imagen del producto</label>
+                            <div class="image-upload-container">
+                                <img id="productImagePreview" src="https://via.placeholder.com/200x200?text=Producto"
+                                    alt="Preview">
+                                <input type="file" id="productImageFile" accept="image/*" hidden>
+                                <button type="button" class="btn btn-secondary" id="uploadImageBtn">
+                                    <i class="fa-solid fa-upload"></i> Subir imagen
+                                </button>
+                            </div>
+                            <input type="hidden" id="productImage">
+                        </div>
+
+                        <div class="form-group-stack">
+                            <div class="form-group">
+                                <label for="productName">Nombre *</label>
+                                <input type="text" id="productName" required placeholder="Nombre del producto">
+                            </div>
+                            <div class="form-group">
+                                <label for="productCategory">Categoría *</label>
+                                <select id="productCategory" required>
+                                    <option value="">Seleccionar categoría</option>
+                                    <option value="indumentaria">Indumentaria</option>
+                                    <option value="zapatillas">Zapatillas</option>
+                                    <option value="complementos">Complementos Dietarios</option>
+                                    <option value="suplementos">Suplementos</option>
+                                    <option value="vitaminas">Vitaminas</option>
+                                    <option value="bolsos">Bolsos</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="productPrice">Precio *</label>
+                                <input type="number" id="productPrice" required min="0" placeholder="Precio en $">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productDescription">Descripción *</label>
+                        <textarea id="productDescription" required rows="3"
+                            placeholder="Descripción del producto"></textarea>
+                    </div>
+
+                    <!-- Sizes section (shown for clothing/shoes) -->
+                    <div class="form-group sizes-section" id="sizesSection" style="display: none;">
+                        <label>Talles y Stock</label>
+                        <div class="sizes-grid" id="sizesGrid">
+                            <!-- Sizes will be generated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Simple stock (for supplements, vitamins, etc.) -->
+                    <div class="form-group simple-stock-section" id="simpleStockSection">
+                        <label for="productStock">Stock *</label>
+                        <input type="number" id="productStock" min="0" value="0" placeholder="Cantidad en stock">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="productActive" checked>
+                            <span class="checkmark"></span>
+                            Producto activo (visible en tienda)
+                        </label>
+                    </div>
+
+                    <div id="productError" class="error-message" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary btn-full">Guardar Producto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/dashboard.js"></script>
+    <script src="/assets/js/admin.js"></script>
+    <script src="/assets/js/admin-products.js"></script>
+    <script src="/assets/js/admin-reports.js"></script>
+</body>
+
+</html>
