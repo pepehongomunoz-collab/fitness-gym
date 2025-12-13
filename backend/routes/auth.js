@@ -98,8 +98,8 @@ const upload = require('../middleware/upload');
 
 router.put('/profile', auth, upload.single('avatar'), async (req, res) => {
     try {
-        const { name, phone, height, weight, address } = req.body;
-        const updateData = { name, phone, height, weight, address };
+        const { name, phone, height, weight, address, objectives, gender, birthDate, initialWeight } = req.body;
+        const updateData = { name, phone, height, weight, address, objectives, gender, birthDate, initialWeight };
 
         if (req.file) {
             // Store relative path

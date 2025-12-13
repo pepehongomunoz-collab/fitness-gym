@@ -32,6 +32,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    gender: {
+        type: String,
+        enum: ['male', 'female'],
+        required: false
+    },
+    birthDate: {
+        type: Date,
+        required: false
+    },
+    initialWeight: {
+        type: Number
+    },
     height: {
         type: Number // in cm
     },
@@ -42,6 +54,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    objectives: [{
+        type: String,
+        trim: true
+    }],
     isActive: {
         type: Boolean,
         default: true

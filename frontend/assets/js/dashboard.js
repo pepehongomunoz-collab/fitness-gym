@@ -1,190 +1,255 @@
-// Dashboard functionality
-let currentUser = null;
-let currentMonth = new Date();
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Check authentication
-    if (!requireAuth()) return;
-
-    // Load user data
+    checkAuth();
     loadUserData();
-
-    // Setup navigation
-    setupNavigation();
-
-    // Setup logout
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-
-    // Setup mobile menu toggle
-    document.getElementById('menuToggle').addEventListener('click', () => {
-        document.querySelector('.sidebar').classList.toggle('open');
-    });
-
-    // Setup booking modal
-    setupBookingModal();
-
-    // Setup profile section
+    setupLogout();
     setupProfileForm();
-
-    // Setup calendar
     setupCalendar();
+    setupTimer();
+    setupNavigation();
 });
 
 // Load user data
 async function loadUserData() {
     try {
-        currentUser = await authAPI.me();
+        const currentUser = await authAPI.getMe();
+        if (!currentUser) {
+            window.location.href = '/login.html';
+            return;
+        }
 
         // Update UI with user info
-        document.getElementById('userName').textContent = currentUser.name;
-        document.getElementById('welcomeName').textContent = currentUser.name.split(' ')[0];
+        // Header & Overview
+        const userNameElements = ['userName', 'welcomeName', 'profileNameDisplay'];
+        userNameElements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = currentUser.name;
+        });
 
-        // Update Header Avatar
+        const userAvatarElements = ['userAvatar', 'profileAvatarPreview']; // Assuming userAvatar is a container or img?
+        // Header avatar is a div with icon, Profile is img
+        const headerAvatar = document.querySelector('#userAvatar'); // Div
+        const profileAvatar = document.getElementById('profileAvatarPreview'); // Img
+
         if (currentUser.avatar) {
-            const avatarContainer = document.getElementById('userAvatar');
-            avatarContainer.innerHTML = `<img src="${currentUser.avatar}" alt="Avatar">`;
+            if (headerAvatar) headerAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="Avatar">`;
+            if (profileAvatar) profileAvatar.src = currentUser.avatar;
         }
 
-        // Populate Profile Form
-        document.getElementById('profileName').value = currentUser.name;
-        document.getElementById('profileEmail').value = currentUser.email;
-        document.getElementById('profilePhone').value = currentUser.phone || '';
-        document.getElementById('profileAddress').value = currentUser.address || '';
-        document.getElementById('profileHeight').value = currentUser.height || '';
+        document.getElementById('profileName').value = currentUser.name || '';
+        document.getElementById('profileEmail').value = currentUser.email || '';
+        document.getElementById('profileEmailDisplay').textContent = currentUser.email || '';
+
+        // Populate objectives
+        if (currentUser.objectives && Array.isArray(currentUser.objectives)) {
+            const checkboxes = document.querySelectorAll('input[name="objectives"]');
+            checkboxes.forEach(cb => {
+                cb.checked = currentUser.objectives.includes(cb.value);
+            });
+        }
+
+        // Populate new profile fields
+        const genderSelect = document.getElementById('profileGender');
+        if (genderSelect) genderSelect.value = currentUser.gender || '';
+
+        const birthInput = document.getElementById('profileBirthDate');
+        if (birthInput && currentUser.birthDate) {
+            birthInput.value = new Date(currentUser.birthDate).toISOString().split('T')[0];
+        }
+
+        const initialWeightInput = document.getElementById('profileInitialWeight');
+        if (initialWeightInput) initialWeightInput.value = currentUser.initialWeight || '';
+
         document.getElementById('profileWeight').value = currentUser.weight || '';
+        document.getElementById('profileHeight').value = currentUser.height || '';
+        document.getElementById('profileAddress').value = currentUser.address || '';
+        document.getElementById('profilePhone').value = currentUser.phone || '';
 
-        document.getElementById('profileNameDisplay').textContent = currentUser.name;
-        document.getElementById('profileEmailDisplay').textContent = currentUser.email;
-        if (currentUser.avatar) {
-            document.getElementById('profileAvatarPreview').src = currentUser.avatar;
-        }
+        // Render Overview Stats
+        renderBodyStats(currentUser);
 
         // Load all dashboard data
         loadOverviewData();
     } catch (error) {
-        console.error('Error loading user:', error);
-        logout();
+        console.error('Error loading user data:', error);
     }
 }
 
-// Load overview data
+// Check if user is authenticated
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login.html';
+    }
+}
+
+// Setup logout
+function setupLogout() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            authAPI.logout();
+        });
+    }
+}
+
+// Setup Navigation
+function setupNavigation() {
+    const navItems = document.querySelectorAll('.nav-item[data-section]');
+    const sections = document.querySelectorAll('.dashboard-section');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetSection = item.dataset.section;
+
+            // Update active nav
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+
+            // Update active section
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetSection) {
+                    section.classList.add('active');
+
+                    // Load section specific data
+                    if (targetSection === 'plan') loadPlanDetails();
+                    if (targetSection === 'bookings') loadBookings();
+                    if (targetSection === 'nutrition') loadNutritionDetails();
+                }
+            });
+        });
+    });
+
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.querySelector('.sidebar');
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+    }
+}
+
+// Load dashboard overview data
 async function loadOverviewData() {
-    loadPlanData();
-    loadRoutineData();
-    loadBookingsData();
-    loadNutritionData();
-}
-
-// Load plan data
-async function loadPlanData() {
     try {
-        const response = await subscriptionsAPI.getMine();
+        // Fix: Pass today's date to avoid /undefined error
+        const today = new Date().toISOString().split('T')[0];
+        const bookings = await bookingsAPI.getAvailable(today);
 
-        const planValue = document.getElementById('overviewPlan');
-        const planStatus = document.getElementById('overviewPlanStatus');
-        const planContent = document.getElementById('planContent');
+        const nutritionText = document.getElementById('overviewNutrition');
+        if (nutritionText) nutritionText.textContent = 'Plan Estándar';
 
-        if (response.hasSubscription) {
-            const sub = response.subscription;
-            planValue.textContent = sub.plan.displayName;
-            planStatus.textContent = getStatusText(sub.status);
-            planStatus.className = `status-badge status-${sub.status}`;
+        try {
+            const sub = await subscriptionsAPI.getMine();
+            console.log('Subscription data received:', sub); // DEBUG
+            const planDisplay = document.getElementById('overviewPlan');
+            const planStatus = document.getElementById('overviewPlanStatus');
 
-            // Render full plan section
-            planContent.innerHTML = renderPlanCard(sub);
-        } else {
-            planValue.textContent = 'Sin plan';
-            planStatus.textContent = 'Inactivo';
-            planStatus.className = 'status-badge status-inactive';
+            // Handle backend response structure { hasSubscription: true, subscription: {...} }
+            const subscriptionData = sub.subscription || sub; // Fallback if API changes
 
-            planContent.innerHTML = `
-                <div class="no-data-card">
-                    <i class="fa-solid fa-credit-card"></i>
-                    <h3>No tienes un plan asignado</h3>
-                    <p>Contacta con nuestro equipo para contratar un plan</p>
-                    <a href="/" class="btn btn-primary">Ver planes</a>
-                </div>
-            `;
+            if (subscriptionData && subscriptionData.plan) {
+                if (planDisplay) planDisplay.textContent = subscriptionData.plan.displayName || subscriptionData.plan.name;
+                if (planStatus) {
+                    const status = subscriptionData.status;
+                    planStatus.textContent = (status === 'al_dia' || status === 'active') ? 'Activo' : 'Pendiente';
+                    planStatus.className = `status-badge ${(status === 'al_dia' || status === 'active') ? 'status-active' : 'status-pending'}`;
+                }
+            } else {
+                if (planDisplay) planDisplay.textContent = 'Sin Plan';
+                if (planStatus) {
+                    planStatus.textContent = '-';
+                    planStatus.className = 'status-badge';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading subscription:', error);
+            const planDisplay = document.getElementById('overviewPlan');
+            if (planDisplay) planDisplay.textContent = 'Sin Plan';
         }
+
+        // Load Routine
+        try {
+            const res = await routinesAPI.getMine();
+            const routineContainer = document.getElementById('routineContent');
+            const overviewRoutine = document.getElementById('overviewRoutine');
+
+            let routineName = 'Sin rutina';
+
+            if (res.hasRoutine && res.routine) {
+                routineName = res.routine.name;
+                if (routineContainer) routineContainer.innerHTML = renderRoutine(res.routine);
+            } else if (routineContainer) {
+                routineContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-dumbbell"></i>
+                        <h3>Sin Rutina Asignada</h3>
+                        <p>${res.message || 'Tu entrenador aún no ha cargado tu plan.'}</p>
+                    </div>
+                `;
+            }
+
+            if (overviewRoutine) overviewRoutine.textContent = routineName;
+
+        } catch (error) {
+            console.error('Error loading routine:', error);
+            if (document.getElementById('routineContent')) {
+                document.getElementById('routineContent').innerHTML = '<p>Error al cargar la rutina.</p>';
+            }
+        }
+
     } catch (error) {
-        console.error('Error loading plan:', error);
+        console.error('Error loading overview:', error);
     }
-}
 
-// Render plan card
-function renderPlanCard(subscription) {
-    const plan = subscription.plan;
-    const statusClass = `status-${subscription.status}`;
-    const statusText = getStatusText(subscription.status);
-
-    const endDate = new Date(subscription.endDate);
-    const daysRemaining = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
-
-    return `
-        <div class="plan-detail-card ${plan.name}">
-            <div class="plan-header">
-                <div class="plan-badge ${plan.name}">
-                    <i class="fa-solid fa-crown"></i>
-                    ${plan.displayName}
-                </div>
-                <span class="status-badge ${statusClass}">${statusText}</span>
-            </div>
-            
-            <div class="plan-price">
-                <span class="currency">$</span>
-                <span class="amount">${plan.price.toLocaleString()}</span>
-                <span class="period">/mes</span>
-            </div>
-            
-            <div class="plan-info">
-                <div class="info-row">
-                    <span class="label">Vencimiento:</span>
-                    <span class="value">${endDate.toLocaleDateString('es-AR')}</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Días restantes:</span>
-                    <span class="value ${daysRemaining < 7 ? 'warning' : ''}">${daysRemaining} días</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Tiempo diario:</span>
-                    <span class="value">${plan.maxDailyMinutes === 1440 ? 'Ilimitado' : plan.maxDailyMinutes / 60 + ' horas'}</span>
-                </div>
-            </div>
-            
-            <div class="plan-features">
-                <h4>Incluye:</h4>
-                <ul>
-                    ${plan.features.map(f => `<li><i class="fa-solid fa-check"></i> ${f}</li>`).join('')}
-                </ul>
-            </div>
-        </div>
-    `;
-}
-
-// Load routine data
-async function loadRoutineData() {
+    // Load Nutrition Section Content
     try {
-        const response = await routinesAPI.getMine();
+        const nutritionContainer = document.getElementById('nutritionContent');
+        if (nutritionContainer) {
+            try {
+                // Try to get real plan, or fall back to default
+                const nutrition = await nutritionAPI.getMine(); // Assuming this works or throws
 
-        const routineValue = document.getElementById('overviewRoutine');
-        const routineContent = document.getElementById('routineContent');
-
-        if (response.hasRoutine) {
-            const routine = response.routine;
-            routineValue.textContent = routine.name;
-            routineContent.innerHTML = renderRoutine(routine);
-        } else {
-            routineValue.textContent = 'Sin rutina';
-            routineContent.innerHTML = `
-                <div class="no-data-card">
-                    <i class="fa-solid fa-dumbbell"></i>
-                    <h3>No tienes una rutina asignada</h3>
-                    <p>Tu entrenador te asignará una rutina personalizada</p>
-                </div>
-            `;
+                if (nutrition && nutrition.plan) {
+                    // Render real plan if structure exists (placeholder logic as we don't know schema yet)
+                    nutritionContainer.innerHTML = `
+                        <div class="nutrition-plan">
+                            <h3>${nutrition.plan.name || 'Tu Plan Nutricional'}</h3>
+                            <p>${nutrition.plan.description || 'Detalles de tu alimentación.'}</p>
+                            <!-- Placeholder for meals -->
+                            <div class="empty-state">
+                                <i class="fa-solid fa-utensils"></i>
+                                <p>Plan cargado. (Visualización detallada en desarrollo)</p>
+                            </div>
+                        </div>
+                     `;
+                } else {
+                    throw new Error('No nutrition plan found');
+                }
+            } catch (err) {
+                // Fallback content
+                nutritionContainer.innerHTML = `
+                    <div class="info-card">
+                        <i class="fa-solid fa-carrot"></i>
+                        <h3>Plan Nutricional Estándar</h3>
+                        <p>Para maximizar tus resultados, te recomendamos seguir estas pautas generales:</p>
+                        <ul style="text-align: left; margin-top: 1rem; list-style-type: disc; padding-left: 20px;">
+                            <li>Mantén una hidratación constante (min. 2L de agua al día).</li>
+                            <li>Prioriza proteínas en cada comida (pollo, pescado, huevos, legumbres).</li>
+                            <li>Consume carbohidratos complejos antes de entrenar (avena, arroz integral, frutas).</li>
+                            <li>Aumenta el consumo de vegetales en almuerzo y cena.</li>
+                            <li>Evita azúcares procesados y alcohol.</li>
+                        </ul>
+                        <p style="margin-top: 1rem; font-size: 0.9em; color: #888;">* Para un plan personalizado, consulta con nuestro nutricionista.</p>
+                    </div>
+                `;
+            }
         }
     } catch (error) {
-        console.error('Error loading routine:', error);
+        console.error('Error loading nutrition content:', error);
     }
 }
 
@@ -198,486 +263,569 @@ function renderRoutine(routine) {
         mantenimiento: 'Mantenimiento'
     };
 
-    return `
+    // Get today's day
+    const days = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const todayName = days[new Date().getDay()];
+
+    const todayRoutine = routine.days.find(d => d.day === todayName);
+
+    let contentHtml = `
         <div class="routine-header">
             <h3>${routine.name}</h3>
             <span class="routine-goal">${goalNames[routine.goal] || routine.goal}</span>
-            <p class="routine-trainer">Asignado por: ${routine.trainer.name}</p>
-        </div>
-        
-        <div class="routine-days">
-            ${routine.days.map(day => `
-                <div class="routine-day">
-                    <div class="day-header">
-                        <h4>${capitalizeFirst(day.day)}</h4>
-                        <span class="muscle-group">${day.muscleGroup}</span>
-                    </div>
-                    <table class="exercises-table">
-                        <thead>
-                            <tr>
-                                <th>Ejercicio</th>
-                                <th>Series</th>
-                                <th>Reps</th>
-                                <th>Peso</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${day.exercises.map(ex => `
-                                <tr>
-                                    <td>${ex.name}</td>
-                                    <td>${ex.sets}</td>
-                                    <td>${ex.reps}</td>
-                                    <td>${ex.weight || '-'}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `).join('')}
-        </div>
-        
-        ${routine.generalNotes ? `
-            <div class="routine-notes">
-                <h4>Notas del entrenador</h4>
-                <p>${routine.generalNotes}</p>
-            </div>
-        ` : ''}
-    `;
-}
-
-// Load bookings data
-async function loadBookingsData() {
-    try {
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 30);
-
-        const bookings = await bookingsAPI.getMine(
-            startDate.toISOString().split('T')[0],
-            endDate.toISOString().split('T')[0]
-        );
-
-        const nextBookingEl = document.getElementById('overviewNextBooking');
-        const bookingsList = document.getElementById('bookingsList');
-
-        const upcomingBookings = bookings.filter(b =>
-            b.status !== 'cancelled' && new Date(b.date) >= new Date()
-        ).sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        if (upcomingBookings.length > 0) {
-            const next = upcomingBookings[0];
-            const date = new Date(next.date);
-            nextBookingEl.textContent = `${date.toLocaleDateString('es-AR')} ${next.startTime}`;
-        } else {
-            nextBookingEl.textContent = 'Sin reservas';
-        }
-
-        // Render bookings list
-        if (bookings.length > 0) {
-            bookingsList.innerHTML = bookings.map(b => renderBookingItem(b)).join('');
-        } else {
-            bookingsList.innerHTML = `
-                <p class="no-bookings">No tienes reservas programadas</p>
-            `;
-        }
-    } catch (error) {
-        console.error('Error loading bookings:', error);
-    }
-}
-
-// Render booking item
-function renderBookingItem(booking) {
-    const date = new Date(booking.date);
-    const isPast = date < new Date();
-    const statusClass = booking.status === 'cancelled' ? 'cancelled' : (isPast ? 'completed' : 'upcoming');
-
-    return `
-        <div class="booking-item ${statusClass}">
-            <div class="booking-date">
-                <span class="day">${date.getDate()}</span>
-                <span class="month">${date.toLocaleDateString('es-AR', { month: 'short' })}</span>
-            </div>
-            <div class="booking-info">
-                <span class="time">${booking.startTime} - ${booking.endTime}</span>
-                <span class="duration">${booking.durationMinutes} min</span>
-            </div>
-            ${!isPast && booking.status !== 'cancelled' ? `
-                <button class="btn-cancel" onclick="cancelBooking('${booking._id}')">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            ` : ''}
         </div>
     `;
-}
 
-// Load nutrition data
-async function loadNutritionData() {
-    try {
-        const response = await nutritionAPI.getMine();
-
-        const nutritionValue = document.getElementById('overviewNutrition');
-        const nutritionContent = document.getElementById('nutritionContent');
-
-        if (response.hasPlan) {
-            const plan = response.plan;
-            nutritionValue.textContent = plan.name;
-            nutritionContent.innerHTML = renderNutritionPlan(plan);
-        } else {
-            nutritionValue.textContent = 'Sin plan';
-            nutritionContent.innerHTML = `
-                <div class="no-data-card">
-                    <i class="fa-solid fa-apple-whole"></i>
-                    <h3>No tienes un plan nutricional asignado</h3>
-                    <p>Nuestro equipo de nutricionistas te asignará un plan personalizado</p>
+    if (todayRoutine) {
+        contentHtml += `
+            <div class="routine-day active-day-card">
+                <div class="day-header">
+                    <h4>Rutina de Hoy: ${capitalizeFirst(todayRoutine.day)}</h4>
+                    <span class="muscle-group">${todayRoutine.muscleGroup}</span>
                 </div>
-            `;
-        }
-    } catch (error) {
-        console.error('Error loading nutrition:', error);
-    }
-}
-
-// Render nutrition plan
-function renderNutritionPlan(plan) {
-    const goalNames = {
-        perdida_peso: 'Pérdida de peso',
-        ganancia_muscular: 'Ganancia muscular',
-        mantenimiento: 'Mantenimiento',
-        definicion: 'Definición'
-    };
-
-    return `
-        <div class="nutrition-header">
-            <h3>${plan.name}</h3>
-            <span class="nutrition-goal">${goalNames[plan.goal] || plan.goal}</span>
-        </div>
-        
-        <div class="nutrition-macros">
-            <div class="macro-item calories">
-                <span class="macro-value">${plan.dailyCalorieTarget || '-'}</span>
-                <span class="macro-label">Calorías/día</span>
-            </div>
-            ${plan.macros ? `
-                <div class="macro-item protein">
-                    <span class="macro-value">${plan.macros.protein}%</span>
-                    <span class="macro-label">Proteína</span>
-                </div>
-                <div class="macro-item carbs">
-                    <span class="macro-value">${plan.macros.carbs}%</span>
-                    <span class="macro-label">Carbohidratos</span>
-                </div>
-                <div class="macro-item fat">
-                    <span class="macro-value">${plan.macros.fat}%</span>
-                    <span class="macro-label">Grasas</span>
-                </div>
-            ` : ''}
-        </div>
-        
-        ${plan.weeklyPlan && plan.weeklyPlan.length > 0 ? `
-            <div class="weekly-plan">
-                <h4>Plan Semanal</h4>
-                <div class="nutrition-days">
-                    ${plan.weeklyPlan.map(day => `
-                        <div class="nutrition-day">
-                            <h5>${capitalizeFirst(day.day)}</h5>
-                            ${day.meals.map(meal => `
-                                <div class="meal">
-                                    <span class="meal-type">${capitalizeFirst(meal.type)}</span>
-                                    <ul class="meal-foods">
-                                        ${meal.foods.map(food => `
-                                            <li>${food.name} ${food.portion ? `(${food.portion})` : ''}</li>
-                                        `).join('')}
-                                    </ul>
+                <div class="exercises-list">
+                    ${todayRoutine.exercises.map((ex, index) => {
+            const uniqueId = `ex-${todayName}-${index}`;
+            const isChecked = localStorage.getItem(uniqueId) === 'true';
+            return `
+                        <div class="exercise-item">
+                            <label class="exercise-checkbox-wrapper">
+                                <input type="checkbox" id="${uniqueId}" ${isChecked ? 'checked' : ''} onchange="toggleExercise('${uniqueId}')">
+                                <span class="checkmark-round"></span>
+                            </label>
+                            <div class="exercise-details">
+                                <span class="exercise-name">${ex.name}</span>
+                                <div class="exercise-meta">
+                                    <span class="tag sets">${ex.sets} Series</span>
+                                    <span class="tag reps">${ex.reps} Reps</span>
+                                    ${ex.weight ? `<span class="tag weight">${ex.weight}</span>` : ''}
                                 </div>
-                            `).join('')}
+                            </div>
                         </div>
-                    `).join('')}
+                        `;
+        }).join('')}
                 </div>
             </div>
-        ` : ''}
-        
-        ${plan.generalNotes ? `
-            <div class="nutrition-notes">
-                <h4>Notas del nutricionista</h4>
-                <p>${plan.generalNotes}</p>
-            </div>
-        ` : ''}
-    `;
-}
-
-// Setup navigation
-function setupNavigation() {
-    const navItems = document.querySelectorAll('.nav-item[data-section]');
-
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            const section = item.dataset.section;
-
-            // Update active nav item
-            navItems.forEach(nav => nav.classList.remove('active'));
-            item.classList.add('active');
-
-            // Show corresponding section
-            document.querySelectorAll('.dashboard-section').forEach(sec => {
-                sec.classList.remove('active');
-            });
-            document.getElementById(section).classList.add('active');
-
-            // Update page title
-            const titles = {
-                overview: 'Dashboard',
-                plan: 'Mi Plan',
-                routine: 'Mi Rutina',
-                bookings: 'Reserva de Turnos',
-                nutrition: 'Plan Nutricional',
-                'admin-users': 'Gestión de Usuarios',
-                'admin-bookings': 'Gestión de Reservas',
-                'admin-settings': 'Configuración'
-            };
-            document.getElementById('pageTitle').textContent = titles[section] || 'Dashboard';
-
-            // Close mobile menu
-            document.querySelector('.sidebar').classList.remove('open');
-        });
-    });
-}
-
-// Setup booking modal
-function setupBookingModal() {
-    const modal = document.getElementById('bookingModal');
-    const openBtn = document.getElementById('newBookingBtn');
-    const closeBtn = document.getElementById('closeBookingModal');
-    const form = document.getElementById('bookingForm');
-    const dateInput = document.getElementById('bookingDate');
-
-    // Set min date to today
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.min = today;
-    dateInput.value = today;
-
-    openBtn.addEventListener('click', () => {
-        modal.classList.add('open');
-        // PRODUCTION ROBUST FIX: User-side matching Admin fix
-        modal.style.display = 'flex';
-        modal.style.position = 'fixed';
-        modal.style.inset = '0';
-        modal.style.width = '100vw';
-        modal.style.height = '100vh';
-        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        modal.style.zIndex = '9999';
-        modal.style.visibility = 'visible';
-        modal.style.opacity = '1';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
-
-        const content = modal.querySelector('.modal-content');
-        if (content) {
-            content.style.display = 'block';
-            content.style.visibility = 'visible';
-            content.style.opacity = '1';
-            content.style.zIndex = '10000';
-            content.style.position = 'relative';
-            content.style.backgroundColor = '#1f2937';
-        }
-
-        loadAvailableSlots(dateInput.value);
-    });
-
-    closeBtn.addEventListener('click', () => {
-        modal.classList.remove('open');
-        modal.style = ''; // Clean forced styles
-        const content = modal.querySelector('.modal-content');
-        if (content) content.style = '';
-    });
-
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('open');
-            modal.style = ''; // Clean forced styles
-            const content = modal.querySelector('.modal-content');
-            if (content) content.style = '';
-        }
-    });
-
-    dateInput.addEventListener('change', () => {
-        loadAvailableSlots(dateInput.value);
-    });
-
-    form.addEventListener('submit', handleBooking);
-}
-
-// Load available slots
-async function loadAvailableSlots(date) {
-    const timeSelect = document.getElementById('bookingTime');
-    timeSelect.innerHTML = '<option value="">Cargando...</option>';
-
-    try {
-        const response = await bookingsAPI.getAvailable(date);
-
-        if (response.message) {
-            timeSelect.innerHTML = `<option value="">${response.message}</option>`;
-            return;
-        }
-
-        const availableSlots = response.slots.filter(s => s.available);
-
-        if (availableSlots.length === 0) {
-            timeSelect.innerHTML = '<option value="">No hay horarios disponibles</option>';
-        } else {
-            timeSelect.innerHTML = '<option value="">Selecciona un horario</option>' +
-                availableSlots.map(slot => `
-                    <option value="${slot.time}">${slot.time}</option>
-                `).join('');
-        }
-    } catch (error) {
-        timeSelect.innerHTML = '<option value="">Error al cargar horarios</option>';
-    }
-}
-
-// Handle booking
-async function handleBooking(e) {
-    e.preventDefault();
-
-    const date = document.getElementById('bookingDate').value;
-    const startTime = document.getElementById('bookingTime').value;
-    const duration = parseInt(document.getElementById('bookingDuration').value);
-    const errorDiv = document.getElementById('bookingError');
-
-    // Calculate end time
-    const [hours, mins] = startTime.split(':').map(Number);
-    const endMinutes = hours * 60 + mins + duration;
-    const endHours = Math.floor(endMinutes / 60);
-    const endMins = endMinutes % 60;
-    const endTime = `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
-
-    try {
-        await bookingsAPI.create({ date, startTime, endTime });
-
-        const modal = document.getElementById('bookingModal');
-        modal.classList.remove('open');
-        modal.style = ''; // Clean forced styles
-        const content = modal.querySelector('.modal-content');
-        if (content) content.style = '';
-
-        loadBookingsData();
-        renderCalendar();
-
-        alert('¡Reserva confirmada!');
-    } catch (error) {
-        errorDiv.textContent = error.message;
-        errorDiv.style.display = 'block';
-    }
-}
-
-// Cancel booking
-window.cancelBooking = async function (id) {
-    if (!confirm('¿Estás seguro de cancelar esta reserva?')) return;
-
-    try {
-        await bookingsAPI.cancel(id);
-        loadBookingsData();
-        renderCalendar();
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-// Setup calendar
-function setupCalendar() {
-    document.getElementById('prevMonth').addEventListener('click', () => {
-        currentMonth.setMonth(currentMonth.getMonth() - 1);
-        renderCalendar();
-    });
-
-    document.getElementById('nextMonth').addEventListener('click', () => {
-        currentMonth.setMonth(currentMonth.getMonth() + 1);
-        renderCalendar();
-    });
-
-    renderCalendar();
-}
-
-// Render calendar
-function renderCalendar() {
-    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-
-    document.getElementById('currentMonth').textContent =
-        `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
-
-    const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-    const lastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-    const daysContainer = document.getElementById('calendarDays');
-
-    let html = '';
-
-    // Empty cells for days before first day of month
-    for (let i = 0; i < firstDay.getDay(); i++) {
-        html += '<div class="calendar-day empty"></div>';
-    }
-
-    // Days of month
-    const today = new Date();
-    for (let day = 1; day <= lastDay.getDate(); day++) {
-        const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-        const isToday = date.toDateString() === today.toDateString();
-        const isPast = date < today && !isToday;
-        const isSunday = date.getDay() === 0;
-
-        html += `
-            <div class="calendar-day ${isToday ? 'today' : ''} ${isPast ? 'past' : ''} ${isSunday ? 'closed' : ''}"
-                 ${!isPast && !isSunday ? `onclick="selectCalendarDate('${date.toISOString().split('T')[0]}')"` : ''}>
-                ${day}
+        `;
+    } else {
+        contentHtml += `
+            <div class="routine-rest-day">
+                <i class="fa-solid fa-mug-hot"></i>
+                <h3>¡Día de Descanso!</h3>
+                <p>Hoy no tienes entrenamiento programado. Recuperate y come bien.</p>
+                <div class="rest-day-actions">
+                     <p class="text-muted">Consulta tu plan completo para ver qué sigue.</p>
+                </div>
             </div>
         `;
     }
 
-    daysContainer.innerHTML = html;
-}
-
-// Select calendar date
-window.selectCalendarDate = function (date) {
-    document.getElementById('bookingDate').value = date;
-    const modal = document.getElementById('bookingModal');
-    modal.classList.add('open');
-
-    // PRODUCTION ROBUST FIX: User-side matching Admin fix
-    modal.style.display = 'flex';
-    modal.style.position = 'fixed';
-    modal.style.inset = '0';
-    modal.style.width = '100vw';
-    modal.style.height = '100vh';
-    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    modal.style.zIndex = '9999';
-    modal.style.visibility = 'visible';
-    modal.style.opacity = '1';
-    modal.style.alignItems = 'center';
-    modal.style.justifyContent = 'center';
-
-    const content = modal.querySelector('.modal-content');
-    if (content) {
-        content.style.display = 'block';
-        content.style.visibility = 'visible';
-        content.style.opacity = '1';
-        content.style.zIndex = '10000';
-        content.style.position = 'relative';
-        content.style.backgroundColor = '#1f2937';
+    // Check if new day to clear old checks (simple check)
+    const lastLoginDate = localStorage.getItem('lastRoutineDate');
+    const todayDateStr = new Date().toDateString();
+    if (lastLoginDate !== todayDateStr) {
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('ex-')) localStorage.removeItem(key);
+        });
+        localStorage.setItem('lastRoutineDate', todayDateStr);
     }
 
-    loadAvailableSlots(date);
+    return contentHtml;
 }
 
-// Helper functions
-function getStatusText(status) {
-    const texts = {
-        'al_dia': 'Al día',
-        'pendiente': 'Pendiente',
-        'suspendido': 'Suspendido'
-    };
-    return texts[status] || status;
+window.toggleExercise = function (id) {
+    const checkbox = document.getElementById(id);
+    localStorage.setItem(id, checkbox.checked);
 }
 
-function capitalizeFirst(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+// Setup Timer
+let timerInterval;
+let seconds = 0;
+let isTimerRunning = false;
+
+function setupTimer() {
+    const display = document.getElementById('workoutTimer');
+    const startBtn = document.getElementById('startTimerBtn');
+    const stopBtn = document.getElementById('stopTimerBtn');
+    const resetBtn = document.getElementById('resetTimerBtn');
+
+    if (!display) return;
+
+    startBtn.addEventListener('click', () => {
+        if (isTimerRunning) return;
+        isTimerRunning = true;
+        timerInterval = setInterval(() => {
+            seconds++;
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            display.textContent = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }, 1000);
+        startBtn.classList.add('active');
+        stopBtn.classList.remove('active');
+    });
+
+    stopBtn.addEventListener('click', () => {
+        isTimerRunning = false;
+        clearInterval(timerInterval);
+        startBtn.classList.remove('active');
+        stopBtn.classList.add('active');
+    });
+
+    resetBtn.addEventListener('click', () => {
+        isTimerRunning = false;
+        clearInterval(timerInterval);
+        seconds = 0;
+        display.textContent = "00:00:00";
+        startBtn.classList.remove('active');
+        stopBtn.classList.remove('active');
+    });
 }
+
+
+// Setup Profile Form
+function setupProfileForm() {
+    const form = document.getElementById('profileForm');
+    const avatarInput = document.getElementById('profileAvatarInput');
+    const errorDiv = document.getElementById('profileError');
+    const objectivesCheckboxes = document.querySelectorAll('input[name="objectives"]');
+
+    if (!form) return;
+
+    // Limit objectives selection to 3
+    objectivesCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const checkedCount = document.querySelectorAll('input[name="objectives"]:checked').length;
+            if (checkedCount > 3) {
+                checkbox.checked = false;
+                alert('Solo puedes seleccionar hasta 3 objetivos.');
+            }
+        });
+    });
+
+    // Handle avatar upload
+    avatarInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        try {
+            await authAPI.updateProfile(formData);
+            loadUserData();
+            const btn = document.querySelector('.avatar-edit-overlay');
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+            setTimeout(() => { btn.innerHTML = originalIcon; }, 2000);
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            alert('Error al subir la imagen: ' + error.message);
+        }
+    });
+
+    // Handle profile update
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const phone = document.getElementById('profilePhone').value;
+        const address = document.getElementById('profileAddress').value;
+        const height = document.getElementById('profileHeight').value;
+        const weight = document.getElementById('profileWeight').value;
+        const gender = document.getElementById('profileGender').value;
+        const birthDate = document.getElementById('profileBirthDate').value;
+        const initialWeight = document.getElementById('profileInitialWeight').value;
+
+        // Get selected objectives
+        const selectedObjectives = Array.from(document.querySelectorAll('input[name="objectives"]:checked'))
+            .map(cb => cb.value);
+
+        try {
+            const updatePayload = {
+                phone,
+                address,
+                height: height ? Number(height) : null,
+                weight: weight ? Number(weight) : null,
+                gender: gender || null,
+                birthDate: birthDate || null,
+                initialWeight: initialWeight ? Number(initialWeight) : null,
+                objectives: selectedObjectives
+            };
+
+            await authAPI.updateProfile(updatePayload);
+
+            // Show success message
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Guardado';
+            btn.classList.add('btn-success');
+            errorDiv.style.display = 'none';
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+            }, 3000);
+
+            // Reload user data
+            loadUserData();
+
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            errorDiv.textContent = error.message;
+            errorDiv.style.display = 'block';
+        }
+    });
+}
+
+let currentDate = new Date();
+
+function setupCalendar() {
+    renderCalendar();
+
+    document.getElementById('prevMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+    });
+}
+
+function renderCalendar() {
+    const daysContainer = document.getElementById('calendarDays');
+    const monthDisplay = document.getElementById('currentMonth');
+
+    if (!daysContainer || !monthDisplay) return;
+
+    daysContainer.innerHTML = '';
+
+    // Set Month Year text
+    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    monthDisplay.textContent = `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+
+    // Get first day and days in month
+    const firstDayIndex = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+
+    // Previous month empty days (padding)
+    // Adjusting for Monday start if needed? HTML says Dom=0
+    // Standard JS getDay(): 0=Sun, 1=Mon...
+
+    for (let i = 0; i < firstDayIndex; i++) {
+        const div = document.createElement('div');
+        div.classList.add('day', 'empty');
+        daysContainer.appendChild(div);
+    }
+
+    // Days of month
+    const today = new Date();
+
+    for (let i = 1; i <= lastDay; i++) {
+        const div = document.createElement('div');
+        div.classList.add('day');
+        div.textContent = i;
+
+        // Check if today
+        if (i === today.getDate() &&
+            currentDate.getMonth() === today.getMonth() &&
+            currentDate.getFullYear() === today.getFullYear()) {
+            div.classList.add('current');
+        }
+
+        // Add click event for booking
+        div.addEventListener('click', () => {
+            // Remove active class from others
+            document.querySelectorAll('.calendar-days .day').forEach(d => d.classList.remove('active'));
+            div.classList.add('active');
+
+            // Format date YYYY-MM-DD
+            const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+            openBookingModal(selectedDate);
+        });
+
+        daysContainer.appendChild(div);
+    }
+}
+
+function openBookingModal(date) {
+    const modal = document.getElementById('bookingModal');
+    if (modal) {
+        modal.classList.add('active');
+        // Populate date input
+        const dateInput = document.getElementById('bookingDate');
+        if (dateInput) {
+            dateInput.value = date.toISOString().split('T')[0];
+        }
+        // Load available slots...
+        loadAvailableSlots(date);
+    }
+}
+
+// Close modal handlers
+document.getElementById('closeBookingModal')?.addEventListener('click', () => {
+    document.getElementById('bookingModal')?.classList.remove('active');
+});
+
+// Load available slots logic (placeholder for now)
+async function loadAvailableSlots(date) {
+    const timeSelect = document.getElementById('bookingTime');
+    if (!timeSelect) return;
+
+    timeSelect.innerHTML = '<option>Cargando...</option>';
+
+    // Fetch slots from API (mockup or real)
+    // For now, generate some generic slots
+    const slots = ['08:00', '09:00', '10:00', '11:00', '16:00', '17:00', '18:00', '19:00'];
+
+    timeSelect.innerHTML = '<option value="">Selecciona un horario</option>' +
+        slots.map(t => `<option value="${t}">${t}</option>`).join('');
+}
+
+function capitalizeFirst(string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+// Render Body Stats (BFI, Weight Progress)
+function renderBodyStats(user) {
+    const bfiDisplay = document.getElementById('overviewBFI');
+    const initialWeightDisplay = document.getElementById('overviewInitialWeight');
+    const currentWeightDisplay = document.getElementById('overviewCurrentWeight');
+
+    if (!bfiDisplay) return;
+
+    // Weight Progress
+    initialWeightDisplay.textContent = user.initialWeight ? `${user.initialWeight} kg` : '-- kg';
+    // ... (previous content)
+}
+
+// Handle Booking Form Submission
+document.getElementById('bookingForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Clear previous errors
+    const errorDiv = document.getElementById('bookingError');
+    if (errorDiv) errorDiv.style.display = 'none';
+
+    try {
+        const date = document.getElementById('bookingDate').value;
+        const startTime = document.getElementById('bookingTime').value;
+        const duration = document.getElementById('bookingDuration').value;
+
+        if (!date || !startTime) {
+            throw new Error('Por favor selecciona fecha y hora.');
+        }
+
+        // Calculate endTime
+        const [startHour, startMin] = startTime.split(':').map(Number);
+        const totalMinutes = parseInt(duration);
+        const endDate = new Date();
+        endDate.setHours(startHour, startMin + totalMinutes);
+        const endTime = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+
+        await bookingsAPI.create({
+            date,
+            startTime,
+            endTime
+        });
+
+        // Close modal and show success (alert for now or custom toast)
+        document.getElementById('bookingModal').classList.remove('active');
+        alert('Reserva confirmada con éxito');
+
+        // Reload bookings list
+        loadBookings();
+        loadOverviewData(); // Update overview card
+
+    } catch (error) {
+        console.error('Booking error:', error);
+        if (errorDiv) {
+            errorDiv.textContent = error.message || 'Error al crear la reserva';
+            errorDiv.style.display = 'block';
+        }
+    }
+});
+
+// Load User Bookings
+window.loadBookings = async function () {
+    const listContainer = document.getElementById('bookingsList');
+    if (!listContainer) return;
+
+    listContainer.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i><p>Cargando reservas...</p></div>';
+
+    try {
+        const bookings = await bookingsAPI.getMine(); // Assuming getMine exists based on other APIs
+
+        if (bookings && bookings.length > 0) {
+            listContainer.innerHTML = bookings.map(booking => `
+                <div class="booking-item">
+                    <div class="booking-date">
+                        <span class="day">${new Date(booking.date).getDate()}</span>
+                        <span class="month">${new Date(booking.date).toLocaleString('es', { month: 'short' }).toUpperCase()}</span>
+                    </div>
+                    <div class="booking-info">
+                        <h4>Entrenamiento</h4>
+                        <p><i class="fa-regular fa-clock"></i> ${booking.startTime} - ${booking.endTime}</p>
+                    </div>
+                    <div class="booking-status ${booking.status}">
+                        ${booking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                    </div>
+                    ${booking.status !== 'cancelled' ? `
+                    <button class="btn-icon delete-booking" onclick="cancelBooking('${booking._id}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>` : ''}
+                </div>
+            `).join('');
+        } else {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fa-regular fa-calendar-xmark"></i>
+                    <h3>No tienes reservas activas</h3>
+                    <p>¡Agenda tu próximo entrenamiento ahora!</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading bookings:', error);
+        listContainer.innerHTML = '<p class="error-text">Error al cargar reservas.</p>';
+    }
+};
+
+window.cancelBooking = async function (id) {
+    if (!confirm('¿Estás seguro de cancelar esta reserva?')) return;
+    try {
+        await bookingsAPI.cancel(id); // Check API for cancel method
+        loadBookings();
+        loadOverviewData();
+    } catch (error) {
+        alert('Error al cancelar reserva');
+    }
+};
+currentWeightDisplay.textContent = user.weight ? `${user.weight} kg` : '-- kg';
+
+// Body Fat Calculation (Deurenberg Formula)
+// Body Fat % = (1.20 × BMI) + (0.23 × Age) - (10.8 × Sex) - 5.4
+// Sex: 1 for male, 0 for female
+if (user.height && user.weight && user.birthDate && user.gender) {
+    const heightM = user.height / 100;
+    const bmi = user.weight / (heightM * heightM);
+
+    const birthDate = new Date(user.birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+
+    const sexValue = user.gender === 'male' ? 1 : 0;
+    const bodyFat = (1.20 * bmi) + (0.23 * age) - (10.8 * sexValue) - 5.4;
+
+    bfiDisplay.textContent = `${bodyFat.toFixed(1)} %`;
+} else {
+    bfiDisplay.textContent = '-- %';
+}
+
+
+// Load Plan Details for "Mi Plan" section
+async function loadPlanDetails() {
+    const container = document.getElementById('planContent');
+    if (!container) return;
+
+    // Show loading
+    container.innerHTML = `
+        <div class="loading-spinner">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <p>Cargando información del plan...</p>
+        </div>
+    `;
+
+    try {
+        const res = await subscriptionsAPI.getMine();
+        // Handle backend structure { hasSubscription: true, subscription: {...} }
+        const sub = res.subscription || res;
+
+        if (sub && sub.plan) {
+            const plan = sub.plan;
+            const startDate = new Date(sub.startDate).toLocaleDateString();
+            const endDate = new Date(sub.endDate).toLocaleDateString();
+            const statusClass = (sub.status === 'al_dia' || sub.status === 'active') ? 'active' : (sub.status === 'pendiente' ? 'pending' : 'expired');
+            const statusText = (sub.status === 'al_dia' || sub.status === 'active') ? 'Al día' : (sub.status === 'pendiente' ? 'Pendiente' : 'Suspendido');
+
+            container.innerHTML = `
+                <div class="stat-card" style="display: block; width: 100%; max-width: 800px; margin: 0 auto; background: rgba(30, 41, 59, 0.5);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+                        <div style="display: flex; gap: 1.5rem; align-items: center;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white;">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 1.5rem; color: white; margin-bottom: 0.5rem;">${plan.displayName || plan.name}</h3>
+                                <p style="color: #94a3b8;">${plan.description || ''}</p>
+                            </div>
+                        </div>
+                        <span class="status-badge status-${statusClass}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                            ${statusText}
+                        </span>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                            <label style="display: block; color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Precio</label>
+                            <span style="color: white; font-weight: 600; font-size: 1.125rem;">$${plan.price} / mes</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                            <label style="display: block; color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Inicio</label>
+                            <span style="color: white; font-weight: 600; font-size: 1.125rem;">${startDate}</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                            <label style="display: block; color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Vencimiento</label>
+                            <span style="color: white; font-weight: 600; font-size: 1.125rem;">${endDate}</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                            <label style="display: block; color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Renovación</label>
+                            <span style="color: white; font-weight: 600; font-size: 1.125rem;">Automática</span>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
+                        <h4 style="color: white; margin-bottom: 1rem;">Incluye:</h4>
+                        <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; list-style: none; padding: 0;">
+                            ${(plan.features || ['Acceso completo', 'Duchas', 'Lockers']).map(f => `
+                                <li style="color: #cbd5e1; display: flex; align-items: center; gap: 0.75rem;">
+                                    <i class="fa-solid fa-check" style="color: #10b981;"></i> ${f}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fa-solid fa-crown"></i>
+                    <h3>No tienes un plan activo</h3>
+                    <p>Contacta a administración para suscribirte.</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading plan details:', error);
+        container.innerHTML = `<p class="error-text">Error al cargar el plan.</p>`;
+    }
+}
+
+// Placeholder functions for other sections
+window.loadNutritionDetails = async function () {
+    console.log('Loading nutrition details...');
+    // Implemented via Overview for now
+};
+
+window.loadBookings = async function () {
+    // Already handled by initial load
+};
+
+// Ensure global scope
+window.loadPlanDetails = loadPlanDetails;

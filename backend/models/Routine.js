@@ -43,7 +43,7 @@ const routineSchema = new mongoose.Schema({
     trainer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false
     },
     name: {
         type: String,

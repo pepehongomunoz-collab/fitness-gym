@@ -96,8 +96,8 @@ function renderUsersTable(users) {
             <tr>
                 <td>
                     <div class="user-cell">
-                        <div class="user-avatar-small">${user.name.charAt(0).toUpperCase()}</div>
-                        <span>${user.name}</span>
+                        <div class="user-avatar-small">${(user.name || '?').charAt(0).toUpperCase()}</div>
+                        <span>${user.name || 'Sin nombre'}</span>
                     </div>
                 </td>
                 <td>${user.email}</td>
@@ -150,7 +150,32 @@ function openAssignPlanModal(userId, userName) {
     document.getElementById('assignUserId').value = userId;
     document.getElementById('assignUserName').value = userName;
     document.getElementById('assignError').style.display = 'none';
-    document.getElementById('assignPlanModal').classList.add('open');
+
+    const modal = document.getElementById('assignPlanModal');
+    modal.classList.add('open');
+
+    // Robust fix: Ensure modal overlay styles are applied
+    modal.style.display = 'flex';
+    modal.style.position = 'fixed';
+    modal.style.inset = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    modal.style.zIndex = '9999';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+
+    const content = modal.querySelector('.modal-content');
+    if (content) {
+        content.style.display = 'block';
+        content.style.visibility = 'visible';
+        content.style.opacity = '1';
+        content.style.zIndex = '10000';
+        content.style.position = 'relative';
+        content.style.backgroundColor = '#1f2937'; // Match dashboard theme
+    }
 }
 
 // ==================== ADMIN CALENDAR ====================

@@ -6,17 +6,17 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
 
 // Get stored token
 function getToken() {
-    return localStorage.getItem('gym_token');
+    return localStorage.getItem('token'); // Changed from 'gym_token' to 'token' based on dashboard.js usage
 }
 
 // Set token
 function setToken(token) {
-    localStorage.setItem('gym_token', token);
+    localStorage.setItem('token', token);
 }
 
 // Remove token
 function removeToken() {
-    localStorage.removeItem('gym_token');
+    localStorage.removeItem('token');
     localStorage.removeItem('gym_user');
 }
 
@@ -80,7 +80,7 @@ async function apiRequest(endpoint, options = {}) {
 const authAPI = {
     register: (data) => apiRequest('/auth/register', { method: 'POST', body: data }),
     login: (data) => apiRequest('/auth/login', { method: 'POST', body: data }),
-    me: () => apiRequest('/auth/me'),
+    getMe: () => apiRequest('/auth/me'),
     updateProfile: (data) => apiRequest('/auth/profile', { method: 'PUT', body: data }),
     changePassword: (data) => apiRequest('/auth/password', { method: 'PUT', body: data })
 };
