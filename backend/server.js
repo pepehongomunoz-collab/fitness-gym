@@ -40,7 +40,7 @@ app.use('/checkout', require('./routes/checkout'));
 
 // Serve frontend pages
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 app.get('/login', (req, res) => {
@@ -85,7 +85,7 @@ app.get('/order-pending', (req, res) => {
 
 // Handle 404
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, '../frontend/index.html'));
+    res.status(404).sendFile(path.join(__dirname, '../index.html'));
 });
 
 // Error handler
