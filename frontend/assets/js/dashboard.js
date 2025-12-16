@@ -598,7 +598,30 @@ function renderBodyStats(user) {
 
     // Weight Progress
     initialWeightDisplay.textContent = user.initialWeight ? `${user.initialWeight} kg` : '-- kg';
-    // ... (previous content)
+    currentWeightDisplay.textContent = user.weight ? `${user.weight} kg` : '-- kg';
+
+    // Body Fat Calculation (Deurenberg Formula)
+    // Body Fat % = (1.20 × BMI) + (0.23 × Age) - (10.8 × Sex) - 5.4
+    // Sex: 1 for male, 0 for female
+    if (user.height && user.weight && user.birthDate && user.gender) {
+        const heightM = user.height / 100;
+        const bmi = user.weight / (heightM * heightM);
+
+        const birthDate = new Date(user.birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+
+        const sexValue = user.gender === 'male' ? 1 : 0;
+        const bodyFat = (1.20 * bmi) + (0.23 * age) - (10.8 * sexValue) - 5.4;
+
+        bfiDisplay.textContent = `${bodyFat.toFixed(1)} %`;
+    } else {
+        bfiDisplay.textContent = '-- %';
+    }
 }
 
 // Handle Booking Form Submission
@@ -703,30 +726,7 @@ window.cancelBooking = async function (id) {
         alert('Error al cancelar reserva');
     }
 };
-currentWeightDisplay.textContent = user.weight ? `${user.weight} kg` : '-- kg';
 
-// Body Fat Calculation (Deurenberg Formula)
-// Body Fat % = (1.20 × BMI) + (0.23 × Age) - (10.8 × Sex) - 5.4
-// Sex: 1 for male, 0 for female
-if (user.height && user.weight && user.birthDate && user.gender) {
-    const heightM = user.height / 100;
-    const bmi = user.weight / (heightM * heightM);
-
-    const birthDate = new Date(user.birthDate);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-
-    const sexValue = user.gender === 'male' ? 1 : 0;
-    const bodyFat = (1.20 * bmi) + (0.23 * age) - (10.8 * sexValue) - 5.4;
-
-    bfiDisplay.textContent = `${bodyFat.toFixed(1)} %`;
-} else {
-    bfiDisplay.textContent = '-- %';
-}
 
 
 // Load Plan Details for "Mi Plan" section
