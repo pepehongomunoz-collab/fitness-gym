@@ -18,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
+app.use('/frontend', express.static(path.join(__dirname, '../frontend')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB
