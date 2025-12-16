@@ -55,7 +55,7 @@ async function handleLogin(e) {
         setUser(response.user);
 
         // Redirect to dashboard
-        window.location.href = '/dashboard';
+        window.location.href = 'dashboard.html';
     } catch (error) {
         errorDiv.textContent = error.message;
         errorDiv.style.display = 'block';
@@ -95,7 +95,7 @@ async function handleRegister(e) {
         setUser(response.user);
 
         // Redirect to dashboard
-        window.location.href = '/dashboard';
+        window.location.href = 'dashboard.html';
     } catch (error) {
         errorDiv.textContent = error.message;
         errorDiv.style.display = 'block';

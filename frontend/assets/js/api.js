@@ -149,7 +149,7 @@ function isAuthenticated() {
 // Redirect if not authenticated
 function requireAuth() {
     if (!isAuthenticated()) {
-        window.location.href = '/login';
+        window.location.href = 'login.html';
         return false;
     }
     return true;
@@ -158,7 +158,7 @@ function requireAuth() {
 // Redirect if already authenticated
 function redirectIfAuth() {
     if (isAuthenticated()) {
-        window.location.href = '/dashboard';
+        window.location.href = 'dashboard.html';
         return true;
     }
     return false;
@@ -167,5 +167,5 @@ function redirectIfAuth() {
 // Logout
 function logout() {
     removeToken();
-    window.location.href = '/login';
+    window.location.href = 'login.html';
 }

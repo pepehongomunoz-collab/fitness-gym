@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!token) {
             showToast('Inicia sesión para agregar al carrito', 'warning');
-            setTimeout(() => window.location.href = '/login', 1500);
+            setTimeout(() => window.location.href = 'login.html', 1500);
             return;
         }
 
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const authIcon = document.getElementById('authIcon');
 
         if (token) {
-            authIcon.href = '/dashboard';
+            authIcon.href = 'dashboard.html';
             authIcon.title = 'Mi Dashboard';
         }
     }

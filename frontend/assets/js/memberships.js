@@ -9,7 +9,7 @@ function updateAuthIcon() {
     const authIcon = document.getElementById('authIcon');
     if (isAuthenticated()) {
         const user = getUser();
-        authIcon.href = '/dashboard';
+        authIcon.href = 'dashboard.html';
         authIcon.title = user?.name || 'Mi Dashboard';
         authIcon.innerHTML = '<i class="fa-solid fa-gauge-high"></i>';
     }
@@ -21,7 +21,7 @@ async function subscribeToPlan(planName) {
     if (!isAuthenticated()) {
         // Save intended plan and redirect to login
         sessionStorage.setItem('intended_plan', planName);
-        window.location.href = '/login';
+        window.location.href = 'login.html';
         return;
     }
 
