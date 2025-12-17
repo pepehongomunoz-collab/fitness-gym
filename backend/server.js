@@ -7,12 +7,9 @@ require('dotenv').config();
 const app = express();
 
 // Middleware
-app.use(cors({
-    origin: '*', // Allow all origins to unblock requests
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
-}));
-app.options('*', cors()); // Enable preflight for all routes
+app.use(cors()); // Default permissive CORS (allows all origins)
+// app.options('*', cors()); // Not strictly necessary with default cors() but harmless
+// Force commit fix: 2025-12-16 T 21:30
 
 // Debug Middleware
 app.use((req, res, next) => {
