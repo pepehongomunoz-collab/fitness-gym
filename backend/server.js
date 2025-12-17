@@ -6,31 +6,49 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
-app.use(cors()); // Default permissive CORS (allows all origins)
-// app.options('*', cors()); // Not strictly necessary with default cors() but harmless
-// Force commit fix: 2025-12-16 T 21:30
+/* =========================
+   CORS – DEBE IR PRIMERO
+========================= */
 
-// Debug Middleware
+app.use(cors({
+    origin: 'https://pepehongomunoz-collab.github.io',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Responder explícitamente a preflight
+app.options('*', (req, res) => {
+    res.sendStatus(200);
+});
+
+/* =========================
+   DEBUG (opcional)
+========================= */
+
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} | Origin: ${req.headers.origin}`);
     next();
 });
 
+/* =========================
+   BODY PARSERS
+========================= */
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from frontend
-app.use(express.static(path.join(__dirname, '../frontend')));
-app.use('/frontend', express.static(path.join(__dirname, '../frontend')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+/* =========================
+   DATABASE
+========================= */
 
-// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('✅ MongoDB Connected'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// API Routes
+/* =========================
+   API ROUTES (ANTES DEL STATIC)
+========================= */
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/subscriptions', require('./routes/subscriptions'));
@@ -45,10 +63,17 @@ app.use('/api/cart', require('./routes/cart'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/reports', require('./routes/reports'));
 
-// Checkout redirect routes
-app.use('/checkout', require('./routes/checkout'));
+/* =========================
+   STATIC FRONTEND (AL FINAL)
+========================= */
 
-// Serve frontend pages
+app.use(express.static(path.join(__dirname, '../frontend')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+/* =========================
+   FRONTEND ROUTES
+========================= */
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
@@ -93,18 +118,28 @@ app.get('/order-pending', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/pages/order-pending.html'));
 });
 
-// Handle 404
+/* =========================
+   404 HANDLER
+========================= */
+
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '../index.html'));
 });
 
-// Error handler
+/* =========================
+   ERROR HANDLER
+========================= */
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Something went wrong!' });
 });
 
+/* =========================
+   SERVER
+========================= */
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
