@@ -10,16 +10,15 @@ const app = express();
    CORS – DEBE IR PRIMERO
 ========================= */
 
-app.use(cors({
+const corsOptions = {
     origin: 'https://pepehongomunoz-collab.github.io',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+};
 
-// Responder explícitamente a preflight
-app.options('*', (req, res) => {
-    res.sendStatus(200);
-});
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 
 /* =========================
    DEBUG (opcional)
