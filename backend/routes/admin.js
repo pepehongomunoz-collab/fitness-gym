@@ -243,6 +243,14 @@ router.post('/bookings', auth, checkRole('admin', 'developer'), async (req, res)
         const [endHour, endMin] = endTime.split(':').map(Number);
         const durationMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
 
+        // Validate duration
+        if (durationMinutes < 30) {
+            return res.status(400).json({ message: 'La reserva debe ser de al menos 30 minutos.' });
+        }
+        if (durationMinutes > 120) {
+            return res.status(400).json({ message: 'La reserva no puede exceder 2 horas (120 minutos).' });
+        }
+
         const booking = new Booking({
             user: userId,
             date: new Date(date),
