@@ -49,7 +49,7 @@ async function apiRequest(endpoint, options = {}) {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for Render cold start
     config.signal = controller.signal;
 
     try {
