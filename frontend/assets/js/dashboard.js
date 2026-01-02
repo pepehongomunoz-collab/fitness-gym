@@ -31,8 +31,9 @@ async function loadUserData() {
         const profileAvatar = document.getElementById('profileAvatarPreview'); // Img
 
         if (currentUser.avatar) {
-            if (headerAvatar) headerAvatar.innerHTML = `<img src="${currentUser.avatar}" alt="Avatar">`;
-            if (profileAvatar) profileAvatar.src = currentUser.avatar;
+            const avatarUrl = getUploadUrl(currentUser.avatar);
+            if (headerAvatar) headerAvatar.innerHTML = `<img src="${avatarUrl}" alt="Avatar">`;
+            if (profileAvatar) profileAvatar.src = avatarUrl;
         }
 
         document.getElementById('profileName').value = currentUser.name || '';

@@ -1,7 +1,18 @@
 // API Configuration
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000/api'
-    : 'https://fitness-gym-h1qk.onrender.com/api';
+const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000'
+    : 'https://fitness-gym-h1qk.onrender.com';
+
+const API_URL = `${BACKEND_URL}/api`;
+
+// Helper to get full URL for uploaded resources (avatars, etc.)
+function getUploadUrl(relativePath) {
+    if (!relativePath) return null;
+    // If it's already a full URL, return as-is
+    if (relativePath.startsWith('http')) return relativePath;
+    // Otherwise, prepend the backend URL
+    return `${BACKEND_URL}${relativePath}`;
+}
 
 // Get stored token
 function getToken() {
