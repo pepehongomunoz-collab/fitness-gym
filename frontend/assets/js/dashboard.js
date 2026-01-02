@@ -674,13 +674,19 @@ document.getElementById('bookingForm')?.addEventListener('submit', async (e) => 
 
 // Load User Bookings
 window.loadBookings = async function () {
+    console.log('loadBookings() called');
     const listContainer = document.getElementById('bookingsList');
-    if (!listContainer) return;
+    if (!listContainer) {
+        console.error('bookingsList container not found!');
+        return;
+    }
 
     listContainer.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i><p>Cargando reservas...</p></div>';
 
     try {
-        const bookings = await bookingsAPI.getMine(); // Assuming getMine exists based on other APIs
+        console.log('Fetching bookings from API...');
+        const bookings = await bookingsAPI.getMine();
+        console.log('Bookings received:', bookings);
 
         if (bookings && bookings.length > 0) {
             listContainer.innerHTML = bookings.map(booking => `
@@ -713,7 +719,7 @@ window.loadBookings = async function () {
         }
     } catch (error) {
         console.error('Error loading bookings:', error);
-        listContainer.innerHTML = '<p class="error-text">Error al cargar reservas.</p>';
+        listContainer.innerHTML = '<p class="error-text">Error al cargar reservas: ' + error.message + '</p>';
     }
 };
 
