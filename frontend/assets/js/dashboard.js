@@ -830,9 +830,7 @@ window.loadNutritionDetails = async function () {
     // Implemented via Overview for now
 };
 
-window.loadBookings = async function () {
-    // Already handled by initial load
-};
+// loadBookings is defined earlier in the file
 
 // Ensure global scope
 window.loadPlanDetails = loadPlanDetails;
