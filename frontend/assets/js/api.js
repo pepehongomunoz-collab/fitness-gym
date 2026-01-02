@@ -1,8 +1,7 @@
 // API Configuration
-// API Configuration
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000/api'
-    : 'https://fitness-gym-g71m.onrender.com/api';
+    : 'https://fitness-gym-h1qk.onrender.com/api';
 
 // Get stored token
 function getToken() {
