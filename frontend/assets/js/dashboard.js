@@ -136,9 +136,39 @@ function setupNavigation() {
 // Load dashboard overview data
 async function loadOverviewData() {
     try {
-        // Fix: Pass today's date to avoid /undefined error
-        const today = new Date().toISOString().split('T')[0];
-        const bookings = await bookingsAPI.getAvailable(today);
+        // Load user's next booking for the overview card
+        try {
+            const myBookings = await bookingsAPI.getMine();
+            const nextBookingDisplay = document.getElementById('overviewNextBooking');
+
+            if (nextBookingDisplay) {
+                // Find the next upcoming booking (not cancelled, date >= today)
+                const now = new Date();
+                const upcomingBookings = myBookings
+                    .filter(b => {
+                        const bookingDate = new Date(b.date);
+                        // Compare dates (ignore time for date comparison)
+                        const bookingDateOnly = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), bookingDate.getDate());
+                        const todayDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        return bookingDateOnly >= todayDateOnly && b.status !== 'cancelled';
+                    })
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                if (upcomingBookings.length > 0) {
+                    const nextBooking = upcomingBookings[0];
+                    const bookingDate = new Date(nextBooking.date);
+                    const day = bookingDate.getDate();
+                    const month = bookingDate.toLocaleString('es', { month: 'short' });
+                    nextBookingDisplay.textContent = `${day} ${month} - ${nextBooking.startTime}`;
+                } else {
+                    nextBookingDisplay.textContent = 'Sin reservas';
+                }
+            }
+        } catch (bookingError) {
+            console.error('Error loading next booking:', bookingError);
+            const nextBookingDisplay = document.getElementById('overviewNextBooking');
+            if (nextBookingDisplay) nextBookingDisplay.textContent = 'Sin reservas';
+        }
 
         const nutritionText = document.getElementById('overviewNutrition');
         if (nutritionText) nutritionText.textContent = 'Plan Estándar';
@@ -676,6 +706,8 @@ document.getElementById('bookingForm')?.addEventListener('submit', async (e) => 
 window.loadBookings = async function () {
     console.log('loadBookings() called');
     const listContainer = document.getElementById('bookingsList');
+    const historyContainer = document.getElementById('bookingsHistoryList');
+
     if (!listContainer) {
         console.error('bookingsList container not found!');
         return;
@@ -688,8 +720,32 @@ window.loadBookings = async function () {
         const bookings = await bookingsAPI.getMine();
         console.log('Bookings received:', bookings);
 
-        if (bookings && bookings.length > 0) {
-            listContainer.innerHTML = bookings.map(booking => `
+        // Separate upcoming and past bookings
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const upcomingBookings = [];
+        const pastBookings = [];
+
+        bookings.forEach(booking => {
+            const bookingDate = new Date(booking.date);
+            const bookingDateOnly = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), bookingDate.getDate());
+
+            if (bookingDateOnly >= todayStart && booking.status !== 'cancelled') {
+                upcomingBookings.push(booking);
+            } else {
+                pastBookings.push(booking);
+            }
+        });
+
+        // Sort upcoming by date ascending
+        upcomingBookings.sort((a, b) => new Date(a.date) - new Date(b.date));
+        // Sort past by date descending (most recent first)
+        pastBookings.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // Render upcoming bookings
+        if (upcomingBookings.length > 0) {
+            listContainer.innerHTML = upcomingBookings.map(booking => `
                 <div class="booking-item">
                     <div class="booking-date">
                         <span class="day">${new Date(booking.date).getDate()}</span>
@@ -702,20 +758,63 @@ window.loadBookings = async function () {
                     <div class="booking-status ${booking.status}">
                         ${booking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
                     </div>
-                    ${booking.status !== 'cancelled' ? `
                     <button class="btn-icon delete-booking" onclick="cancelBooking('${booking._id}')">
                         <i class="fa-solid fa-trash"></i>
-                    </button>` : ''}
+                    </button>
                 </div>
             `).join('');
         } else {
             listContainer.innerHTML = `
                 <div class="empty-state">
                     <i class="fa-regular fa-calendar-xmark"></i>
-                    <h3>No tienes reservas activas</h3>
+                    <h3>No tienes reservas próximas</h3>
                     <p>¡Agenda tu próximo entrenamiento ahora!</p>
                 </div>
             `;
+        }
+
+        // Render past bookings (history)
+        if (historyContainer) {
+            if (pastBookings.length > 0) {
+                historyContainer.innerHTML = pastBookings.map(booking => `
+                    <div class="booking-item booking-past" style="opacity: 0.7;">
+                        <div class="booking-date">
+                            <span class="day">${new Date(booking.date).getDate()}</span>
+                            <span class="month">${new Date(booking.date).toLocaleString('es', { month: 'short' }).toUpperCase()}</span>
+                        </div>
+                        <div class="booking-info">
+                            <h4>Entrenamiento</h4>
+                            <p><i class="fa-regular fa-clock"></i> ${booking.startTime} - ${booking.endTime}</p>
+                        </div>
+                        <div class="booking-status ${booking.status === 'cancelled' ? 'cancelled' : 'completed'}">
+                            ${booking.status === 'cancelled' ? 'Cancelada' : 'Completada'}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                historyContainer.innerHTML = `
+                    <div class="empty-state" style="padding: 1rem;">
+                        <p style="color: #94a3b8;">No tienes reservas anteriores</p>
+                    </div>
+                `;
+            }
+
+            // Setup toggle for history section
+            const historyToggle = document.getElementById('historyToggle');
+            const historyChevron = document.getElementById('historyChevron');
+
+            if (historyToggle && !historyToggle.dataset.listenerAdded) {
+                historyToggle.dataset.listenerAdded = 'true';
+                historyToggle.addEventListener('click', () => {
+                    const isHidden = historyContainer.style.display === 'none';
+                    historyContainer.style.display = isHidden ? 'block' : 'none';
+                    if (historyChevron) {
+                        historyChevron.className = isHidden
+                            ? 'fa-solid fa-chevron-up'
+                            : 'fa-solid fa-chevron-down';
+                    }
+                });
+            }
         }
     } catch (error) {
         console.error('Error loading bookings:', error);
